@@ -58,7 +58,7 @@ try:
             file_path = data_folder / f"{la_name}.txt"
             with open(file_path, 'w') as f:
                 f.write('\n'.join(instances[la_name]))
-            print(f"✓ {la_name}.txt ({len(instances[la_name])} dòng)")
+            print(f"[OK] {la_name}.txt ({len(instances[la_name])} dòng)")
             count += 1
         else:
             print(f"✗ Không tìm thấy {la_name}")
@@ -67,7 +67,7 @@ try:
     temp_file.unlink()
     
     print(f"\n{'='*60}")
-    print(f"✓ Hoàn tất! Đã tạo {count}/40 files")
+    print(f"[OK] Hoàn tất! Đã tạo {count}/40 files")
     print(f"  Lưu tại: {data_folder.absolute()}/")
     print(f"{'='*60}")
     
