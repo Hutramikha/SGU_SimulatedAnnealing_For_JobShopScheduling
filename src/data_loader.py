@@ -11,8 +11,15 @@ from pathlib import Path
 class DataLoader:
     """Lớp đọc và xử lý file dữ liệu job shop từ OR-Library"""
     
-    def __init__(self, data_dir="data"):
-        self.data_dir = Path(data_dir)
+    def __init__(self, data_dir=None):
+        # Nếu không pass data_dir, tìm từ project root (nơi source code)
+        if data_dir is None:
+            # project_root = thư mục chứa src/ (nơi data_loader.py nằm)
+            project_root = Path(__file__).parent.parent
+            self.data_dir = project_root / "data"
+        else:
+            self.data_dir = Path(data_dir)
+        
         self.n_jobs = None
         self.n_machines = None
         self.processing_times = None  # Ma trận P (n_jobs x n_machines)

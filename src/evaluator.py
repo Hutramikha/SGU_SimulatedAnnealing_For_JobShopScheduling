@@ -11,14 +11,21 @@ from typing import Dict, Optional
 class Evaluator:
     """Lớp đánh giá kết quả giải pháp"""
     
-    def __init__(self, bks_file: str = "LA_BKS.csv"):
+    def __init__(self, bks_file=None):
         """
         Khởi tạo Evaluator
         
         Args:
             bks_file: Đường dẫn tới file chứa Best Known Solutions
+                      Nếu None, sẽ tìm từ project_root/data/LA_BKS.csv
         """
         self.bks_dict = {}
+        
+        # Nếu không pass bks_file, tìm từ project root
+        if bks_file is None:
+            project_root = Path(__file__).parent.parent
+            bks_file = project_root / "data" / "LA_BKS.csv"
+        
         self.load_bks(bks_file)
     
     def load_bks(self, bks_file: str):
@@ -35,7 +42,7 @@ class Evaluator:
             return
         
         try:
-            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(file_path, 'r', encoding='utf-8-sig', errors='ignore') as f:  # utf-8-sig strips BOM automatically
                 for line in f:
                     line = line.strip()
                     # Bỏ qua comment và dòng trống
@@ -82,7 +89,7 @@ class Evaluator:
         """
         bks = self.get_bks(instance_name)
         
-        if bks is None:
+        if bks is None or bks == 0:
             return None
         
         if result < bks:

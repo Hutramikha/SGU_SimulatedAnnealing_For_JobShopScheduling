@@ -5,6 +5,8 @@ Chức năng: Trực quan hóa kết quả
 - Vẽ đồ thị hội tụ (Makespan theo thế hệ)
 """
 
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend - thread-safe, không cần GUI display
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
@@ -15,14 +17,21 @@ from pathlib import Path
 class Visualizer:
     """Lớp trực quan hóa kết quả"""
     
-    def __init__(self, output_dir: str = "results"):
+    def __init__(self, output_dir=None):
         """
         Khởi tạo Visualizer
         
         Args:
             output_dir: Thư mục lưu hình vẽ
+                       Nếu None, sẽ sử dụng project_root/results
         """
-        self.output_dir = Path(output_dir)
+        if output_dir is None:
+            project_root = Path(__file__).parent.parent
+            self.output_dir = project_root / "results"
+        else:
+            # Nếu pass là string hoặc Path object  
+            self.output_dir = Path(output_dir)
+        
         self.output_dir.mkdir(exist_ok=True)
     
     def plot_gantt_chart(self, schedule: Dict, jssp_model, instance_name: str = "instance"):
@@ -78,8 +87,11 @@ class Visualizer:
         
         # Cấu hình trục
         ax.set_ylim(-0.5, jssp_model.n_machines - 0.5)
-        ax.set_xlim(0, max(task['end'] for tasks in machines_tasks.values() 
-                          for task in tasks) * 1.05 if machines_tasks[0] else 0)
+        
+        # Tính max makespan - safe check tránh lỗi nếu tasks trống
+        all_tasks = [task for tasks in machines_tasks.values() for task in tasks]
+        max_makespan = max(task['end'] for task in all_tasks) * 1.05 if all_tasks else 0
+        ax.set_xlim(0, max_makespan)
         
         ax.set_xlabel('Thời gian', fontsize=12, fontweight='bold')
         ax.set_ylabel('Máy', fontsize=12, fontweight='bold')
@@ -122,15 +134,18 @@ class Visualizer:
         
         ax1.plot(iterations, makespan_history, 'b-', linewidth=2, label='Best Makespan')
         
-        if bks is not None:
+        if bks is not None and len(makespan_history) > 0:
             ax1.axhline(y=bks, color='g', linestyle='--', linewidth=2, label=f'BKS = {bks}')
             
-            # Tính Gap
-            final_gap = (makespan_history[-1] - bks) / bks * 100
-            ax1.text(0.98, 0.05, f'Gap = {final_gap:.2f}%',
-                    transform=ax1.transAxes, fontsize=11,
-                    verticalalignment='bottom', horizontalalignment='right',
-                    bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+            # Tính Gap - safe check
+            try:
+                final_gap = (makespan_history[-1] - bks) / bks * 100
+                ax1.text(0.98, 0.05, f'Gap = {final_gap:.2f}%',
+                        transform=ax1.transAxes, fontsize=11,
+                        verticalalignment='bottom', horizontalalignment='right',
+                        bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+            except (IndexError, ZeroDivisionError) as e:
+                print(f"[WARNING] Failed to calculate gap: {e}")
         
         ax1.set_xlabel('Số lần lặp', fontsize=12, fontweight='bold')
         ax1.set_ylabel('Makespan', fontsize=12, fontweight='bold')

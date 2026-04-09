@@ -1,13 +1,19 @@
 """
 Configuration module - Cấu hình tham số cho thuật toán SA
 """
+from pathlib import Path
+
 
 class SAConfig:
     """Lớp quản lý toàn bộ tham số của thuật toán Simulated Annealing"""
     
     def __init__(self):
+        # Resolve paths từ project root
+        project_root = Path(__file__).parent.parent
+        
         # ==================== THAM SỐ NHIỆT ĐỘ ====================
         self.T0 = 1000.0           # Nhiệt độ ban đầu
+        self.T0_initial = self.T0   # Lưu nhiệt độ ban đầu để reset giữa các lần chạy
         self.T_min = 0.01          # Nhiệt độ dừng (ngưỡng dừng)
         
         # ==================== THAM SỐ LÀMẠNH ====================
@@ -27,9 +33,10 @@ class SAConfig:
         self.swap_probability = 0.5   # Xác suất sử dụng toán tử Swap (50% Swap, 50% Move)
         
         # ==================== CẤU HÌNH DỮ LIỆU ====================
-        self.data_dir = "data"        # Thư mục chứa dữ liệu
-        self.results_dir = "results"  # Thư mục chứa kết quả
-        self.bks_file = "LA_BKS.csv"  # File chứa Best Known Solutions
+        # Sử dụng absolute paths từ project_root để hoạt động từ bất kỳ directory nào
+        self.data_dir = project_root / "data"           # Thư mục chứa dữ liệu
+        self.results_dir = project_root / "results"     # Thư mục chứa kết quả
+        self.bks_file = project_root / "data" / "LA_BKS.csv"  # File chứa Best Known Solutions
         
         # ==================== CẤU HÌNH XUẤT RA ====================
         self.verbose = True           # In chi tiết quá trình làm việc

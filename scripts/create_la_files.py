@@ -5,7 +5,8 @@ Tạo file la01.txt tới la40.txt từ OR-Library
 import urllib.request
 from pathlib import Path
 
-data_folder = Path("data")
+project_root = Path(__file__).parent.parent
+data_folder = project_root / "data"
 data_folder.mkdir(exist_ok=True)
 
 print("Đang tải jobshop1.txt từ OR-Library...\n")

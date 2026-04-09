@@ -12,10 +12,11 @@ import threading
 from PIL import Image, ImageTk
 import sys
 
-# Thêm src vào path
-sys.path.insert(0, str(Path(__file__).parent / 'src'))
+# Thêm project root vào path (từ parent directory)
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
-from config.config import SAConfig
+from config import SAConfig
 from src.data_loader import DataLoader
 from src.jssp_model import JSSPModel
 from src.sa_solver import SASolver
@@ -270,35 +271,85 @@ class SAJSSP_GUI:
     def _solve_thread(self, instance_name):
         """Thread chạy thuật toán"""
         try:
+            # Reset ALL objects mỗi lần chạy để tránh cache issues
+            # ← Đây là nguyên nhân lỗi: LA07 rồi LA06, state bị cache!
+            self.evaluator = Evaluator()
+            self.data_loader = DataLoader()  # ← Reset DataLoader
+            print(f"[DEBUG] All objects reset. Instance: {instance_name}")
+            
             # Load dữ liệu
-            data = self.data_loader.load_instance(f"{instance_name}.txt")
+            try:
+                data = self.data_loader.load_instance(f"{instance_name}.txt")
+                print(f"[DEBUG] Data loaded. Jobs: {data['n_jobs']}, Machines: {data['n_machines']}")
+            except Exception as e:
+                raise Exception(f"Data load failed: {e}")
             
             # Tạo model
-            model = JSSPModel(data['n_jobs'], data['n_machines'],
-                            data['processing_times'], data['machine_order'])
+            try:
+                model = JSSPModel(data['n_jobs'], data['n_machines'],
+                                data['processing_times'], data['machine_order'])
+            except Exception as e:
+                raise Exception(f"Model creation failed: {e}")
             
             # Chạy SA
-            solver = SASolver(model, self.config)
-            best_solution, best_makespan, history = solver.solve()
+            try:
+                solver = SASolver(model, self.config)
+                best_solution, best_makespan, history = solver.solve()
+                print(f"[DEBUG] SA solve done. Best makespan: {best_makespan}")
+            except Exception as e:
+                raise Exception(f"SA solver failed: {e}")
             
             # Đánh giá
-            evaluation = self.evaluator.evaluate_solution(best_makespan, instance_name)
+            try:
+                bks = self.evaluator.get_bks(instance_name)
+                print(f"[DEBUG] Got BKS: {bks}")
+                
+                evaluation = self.evaluator.evaluate_solution(best_makespan, instance_name)
+                print(f"[DEBUG] Evaluation: gap={evaluation.get('gap_percent', 'ERROR')}")
+            except Exception as e:
+                raise Exception(f"Evaluation failed: {e}")
             
             # Lưu biểu đồ
-            visualizer = Visualizer(self.config.results_dir)
-            schedule = solver.get_schedule()
-            visualizer.plot_gantt_chart(schedule, model, instance_name)
-            bks = self.evaluator.get_bks(instance_name)
-            visualizer.plot_convergence(history, instance_name, bks)
+            try:
+                visualizer = Visualizer(self.config.results_dir)
+                schedule = solver.get_schedule()
+                visualizer.plot_gantt_chart(schedule, model, instance_name)
+                bks = self.evaluator.get_bks(instance_name)
+                visualizer.plot_convergence(history, instance_name, bks)
+            except Exception as e:
+                print(f"[WARNING] Visualization failed: {e}")
             
             # Hiển thị kết quả
-            result_text = self._format_result(instance_name, evaluation, history)
+            try:
+                result_text = self._format_result(instance_name, evaluation, history)
+            except Exception as e:
+                raise Exception(f"Format result failed: {e}")
+            
+            # Lưu kết quả vào file (cùng format như main.py)
+            try:
+                result_file = self.config.results_dir / f"{instance_name}_result.txt"
+                with open(result_file, 'w', encoding='utf-8') as f:
+                    f.write(f"Instance: {instance_name.upper()}\n")
+                    f.write(f"Makespan: {best_makespan}\n")
+                    f.write(f"BKS: {evaluation['bks']}\n")
+                    # Check "is not None" để tránh 0 bị xem là False
+                    gap_str = f"{evaluation['gap_percent']:.2f}" if evaluation['gap_percent'] is not None else 'N/A'
+                    f.write(f"Gap (%): {gap_str}\n")
+                    f.write(f"Quality: {evaluation['quality']}\n\n")
+                    f.write(f"Schedule:\n{model.get_schedule_info(best_solution)}\n")
+            except Exception as e:
+                raise Exception(f"Save result failed: {e}")
             
             # Cập nhật UI (thread-safe)
             self.root.after(0, self._update_result_ui, result_text)
             
         except Exception as e:
-            self.root.after(0, lambda: messagebox.showerror("Loi", f"Loi: {e}"))
+            # Capture exception trong default argument để tránh closure issue
+            error_msg = f"{type(e).__name__}: {str(e)}"
+            print(f"[ERROR] _solve_thread: {error_msg}")
+            import traceback
+            traceback.print_exc()
+            self.root.after(0, lambda err=error_msg: messagebox.showerror("Loi", f"Loi: {err}"))
         
         finally:
             self.is_running = False
@@ -306,12 +357,16 @@ class SAJSSP_GUI:
     
     def _format_result(self, instance_name, evaluation, history):
         """Format kết quả"""
+        # Tính gap_display trước để tránh syntax error trong f-string format specifier
+        # Check "is not None" để tránh 0 bị xem là False
+        gap_display = f"{evaluation['gap_percent']:.2f}" if evaluation['gap_percent'] is not None else 'N/A'
+        
         result = f"""
 ========== KET QUA ==========
 Instance:        {instance_name.upper()}
 Makespan:        {evaluation['makespan']}
 BKS:             {evaluation['bks']}
-Gap (%):         {evaluation['gap_percent']:.2f if evaluation['gap_percent'] else 'N/A'}
+Gap (%):         {gap_display}
 Chat Luong:      {evaluation['quality']}
 
 ========== THONG KE ==========
@@ -337,6 +392,8 @@ Ty Le Chap Nhan: {100*history['accepted_count']/(history['accepted_count']+histo
         self.progress.stop()
         self.btn_run.config(state=tk.NORMAL)
         self.status_var.set("Hoan tat!")
+        # Tự động reload danh sách kết quả
+        self.load_results_list()
     
     def show_gantt(self):
         """Hiển thị Gantt chart"""

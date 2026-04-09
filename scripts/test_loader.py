@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 """Quick test for data loader"""
 
+import sys
+from pathlib import Path
+
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
 from src.data_loader import DataLoader
 
 try:

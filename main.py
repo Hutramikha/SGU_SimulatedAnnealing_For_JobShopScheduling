@@ -11,7 +11,7 @@ from pathlib import Path
 # Thêm thư mục src vào path
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-from config.config import SAConfig
+from config import SAConfig
 from src.data_loader import DataLoader
 from src.jssp_model import JSSPModel
 from src.sa_solver import SASolver
@@ -87,7 +87,7 @@ def solve_single_instance(instance_name: str, config: SAConfig = None) -> dict:
             f.write(f"Instance: {instance_name.upper()}\n")
             f.write(f"Makespan: {best_makespan}\n")
             f.write(f"BKS: {evaluation['bks']}\n")
-            f.write(f"Gap (%): {evaluation['gap_percent'] if evaluation['gap_percent'] else 'N/A'}\n")
+            f.write(f"Gap (%): {evaluation['gap_percent'] if evaluation['gap_percent'] is not None else 'N/A'}\n")
             f.write(f"Quality: {evaluation['quality']}\n\n")
             f.write(f"Schedule:\n{model.get_schedule_info(best_solution)}\n")
         print(f"[OK] Kết quả lưu tại: {results_file}")

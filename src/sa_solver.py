@@ -152,8 +152,20 @@ class SASolver:
     
     def _phase_initialization(self):
         """Giai đoạn 1: Khởi tạo"""
-        # Reset Early Stopping Checker
+        # Reset ALL state from previous runs
         self.early_stopper.reset()
+        
+        # CRITICAL: Reset history dict - prevents state pollution from previous instance
+        self.history = {
+            'makespan': [],
+            'temperature': [],
+            'iterations': [],
+            'accepted_count': 0,
+            'rejected_count': 0
+        }
+        
+        # Reset temperature to initial value
+        self.config.T0 = self.config.T0_initial
         
         # Sinh lời giải ngẫu nhiên
         self.current_solution = self.model.generate_random_solution()
@@ -184,7 +196,15 @@ class SASolver:
         print(f"Chấp nhận:           {self.history['accepted_count']}")
         print(f"Từ chối:             {self.history['rejected_count']}")
         print(f"Thời gian:           {elapsed_time:.2f} giây")
-        print(f"Tỷ lệ chấp nhận:     {self.history['accepted_count'] / (self.history['accepted_count'] + self.history['rejected_count']) * 100:.1f}%")
+        
+        # Check trước khi chia để tránh division by zero
+        total_decisions = self.history['accepted_count'] + self.history['rejected_count']
+        if total_decisions > 0:
+            acceptance_rate = self.history['accepted_count'] / total_decisions * 100
+            print(f"Tỷ lệ chấp nhận:     {acceptance_rate:.1f}%")
+        else:
+            print(f"Tỷ lệ chấp nhận:     N/A (Không có quyết định)")
+        
         print(f"{'='*70}\n")
     
     def get_schedule(self) -> Dict:

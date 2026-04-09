@@ -7,9 +7,11 @@ Chạy: python verify_chapter3_features.py
 
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-from config.config import SAConfig
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+from config import SAConfig
 from src.data_loader import DataLoader
 from src.jssp_model import JSSPModel
 from src.sa_solver import SASolver
