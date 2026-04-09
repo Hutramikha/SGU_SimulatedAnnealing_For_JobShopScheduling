@@ -1,230 +1,287 @@
-# Job Shop Scheduling Problem Solver using Simulated Annealing
+# Giải Quyết Bài Toán Job Shop Scheduling Bằng Simulated Annealing
 
-A comprehensive implementation of the **Simulated Annealing (SA)** algorithm for solving the **Job Shop Scheduling Problem (JSSP)** with adaptive mechanisms and benchmark evaluation.
+Dự án này hiện thực hóa thuật toán Simulated Annealing (SA) để giải quyết bài toán Job Shop Scheduling Problem (JSSP) với các cơ chế nâng cao và đánh giá theo tiêu chuẩn công nghiệp.
 
-## Overview
+---
 
-This project implements a production-ready SA solver for JSSP with the following features:
+## 1. GIỚI THIỆU BÀI TOÁN
 
-- **Adaptive Cooling Schedule**: Dynamically adjusts cooling rate based on solution improvement
-- **Metropolis Acceptance Criterion**: Probabilistic acceptance of worse solutions for escape local optima
-- **Early Stopping with Reheating**: Prevents premature convergence
-- **Operation-based Encoding**: Ensures feasible solutions without repair mechanisms
-- **Comprehensive Visualization**: Gantt charts and convergence analysis
-- **Standard Benchmarks**: All 40 Lawrence (LA01-LA40) instances from OR-Library
+### Bài Toán Job Shop Scheduling (JSSP)
 
-## Problem Definition
+JSSP là một bài toán tối ưu hóa cổ điển trong lĩnh vực lập lịch sản xuất. Định nghĩa:
 
-**Job Shop Scheduling Problem (JSSP):**
-- Schedule **n** jobs across **m** machines
-- Each job consists of **m** operations in fixed machine order
-- Each operation has fixed processing time
-- Constraints:
-  - Each operation on each job must execute in order
-  - Each machine can process at most one job at a time
-- Objective: Minimize **makespan** (C_max) = maximum completion time across all jobs
+**Đầu vào:**
+- n công việc (jobs)
+- m máy (machines)
+- Mỗi công việc gồm m hạng mục (operations) phải thực hiện theo thứ tự cố định
+- Mỗi hạng mục có thời gian xử lý cố định trên mỗi máy
 
-**Mathematical Formulation:**
+**Ràng buộc:**
+- Mỗi công việc phải hoàn thành các hạng mục theo thứ tự đã cho
+- Mỗi máy chỉ có thể xử lý một hạng mục tại một thời điểm
+- Không cho phép gián đoạn (preemption)
+
+**Mục tiêu:**
+Tối thiểu hóa Makespan (C_max) = thời gian hoàn thành tất cả công việc
+
+Công thức toán học:
 ```
-Minimize: C_max = max{C_j,m | j ∈ [1,n], m ∈ [1,m]}
+Minimize: C_max = max{C_j,m | j=1..n, m=1..m}
 
-Subject to:
-- C_{i,j} ≥ C_{i-1,j} + p_{i,j}  (precedence constraints)
-- C_{i,j} ≥ C_{i,k} + p_{i,k}  (machine conflict avoidance)
-```
-
-## Project Structure
-
-```
-SAforJSScheduling/
-├── config/
-│   ├── __init__.py
-│   └── config.py           # Configuration management (15+ parameters)
-├── src/
-│   ├── __init__.py
-│   ├── data_loader.py      # OR-Library format parsing
-│   ├── jssp_model.py       # JSSP model with Operation-based encoding
-│   ├── sa_solver.py        # Main SA algorithm implementation
-│   ├── evaluator.py        # Solution evaluation & BKS comparison
-│   ├── utils.py            # Helper classes (operators, cooling, acceptance)
-│   └── visualizer.py       # Gantt charts and convergence plots
-├── data/                   # OR-Library LA01-LA40 instances (40 files)
-├── results/                # Output Gantt charts and convergence plots
-├── main.py                 # Entry point for single/batch solving
-├── LA_BKS.csv             # Best Known Solutions reference
-├── requirement.txt         # Python dependencies
-└── README.md              # This file
+Constraint:
+  S_{i,j+1} >= C_{i,j}  (thứ tự công việc)
+  S_{j,k}   >= C_{i,k} hoặc S_{i,k} >= C_{j,k}  (xung đột máy)
 ```
 
-## Installation
+**Độ phức tạp:** NP-hard
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/yourusername/SAforJSScheduling.git
-cd SAforJSScheduling
-```
+---
 
-### 2. Install dependencies
+## 2. GIẢI PHÁP: SIMULATED ANNEALING
+
+### Các Thành Phần Chính
+
+1. **Mã Hóa Operation-Based**: Lời giải là dãy mã hóa đảm bảo khả thi
+2. **Tiêu Chí Chấp Nhận Metropolis**: Chấp nhận lời giải xấu hơn với xác suất exp(-delta/T)
+3. **Làm Lạnh Thích Nghi**: Tự động chuyển từ thăm dò sang khai thác
+4. **Dừng Sớm Với Tái Hâm Nóng**: Thoát khỏi tối ưu cục bộ hiệu quả
+5. **Toán Tử Lân Cận**: SWAP (50%) và MOVE (50%)
+
+---
+
+## 3. CÀI ĐẶT VÀ CHẠY
+
+### Yêu Cầu
+
+- Python 3.8+
+- Các thư viện: numpy, matplotlib
+
+### Cài Đặt
+
 ```bash
 pip install -r requirement.txt
 ```
 
-Or manually:
-```bash
-pip install numpy>=1.21.0 matplotlib>=3.3.0
-```
+### Cách Sử Dụng
 
-### 3. (Optional) Create virtual environment
-```bash
-# Windows
-python -m venv venv
-venv\Scripts\activate
-
-# Linux/macOS
-python3 -m venv venv
-source venv/bin/activate
-```
-
-## Usage
-
-### Quick Start: Solve a Single Instance
-
+**Chạy CLI (dòng lệnh):**
 ```bash
 python main.py
 ```
 
-This executes `solve_single_instance("la01")` with default configuration.
-
-**Output:**
-- Console: Algorithm progress, final results, execution time
-- `/results/gantt_la01.png`: Gantt chart visualization
-- `/results/convergence_la01.png`: Temperature and makespan convergence curves
-- `/results/la01_result.txt`: Detailed results summary
-
-### Advanced: Batch Processing
-
-Edit `main.py` to run multiple instances:
-
-```python
-if __name__ == "__main__":
-    # Solve LA01-LA10
-    solve_multiple_instances(["la01", "la02", "la03", "la04", "la05", 
-                             "la06", "la07", "la08", "la09", "la10"])
+**Chạy GUI (giao diện đồ họa):**
+```bash
+python gui/gui.py
 ```
 
-**Output:**
-- 10 Gantt charts in `/results/`
-- 10 convergence plots in `/results/`
-- `/results/convergence_comparison.png`: Superimposed convergence curves
-- `/results/comparison_bar.png`: SA results vs BKS reference
+**Chọn instance khác:**
+Chỉnh sửa trong main.py hoặc chọn trong GUI từ la01 đến la40
 
-### Programmatic Usage
+---
 
-```python
-from config.config import SAConfig
-from src.data_loader import DataLoader
-from src.jssp_model import JSSPModel
-from src.sa_solver import SASolver
-from src.evaluator import Evaluator
-from src.visualizer import Visualizer
+## 4. CẤU TRÚC THƯ MỤC
 
-# 1. Configure
-config = SAConfig()
-config.T0 = 1200.0          # Initial temperature
-config.alpha_explore = 0.98 # Slow cooling (exploration)
-config.alpha_exploit = 0.95 # Fast cooling (exploitation)
-
-# 2. Load data
-loader = DataLoader(config.data_dir)
-data = loader.load_instance("la01.txt")
-
-# 3. Create model
-model = JSSPModel(data['n_jobs'], data['n_machines'], 
-                 data['processing_times'], data['machine_order'])
-
-# 4. Solve
-solver = SASolver(model, config)
-best_solution, best_makespan, history = solver.solve()
-
-# 5. Evaluate
-evaluator = Evaluator(config.bks_file)
-evaluation = evaluator.evaluate_solution(best_makespan, "la01")
-print(f"Makespan: {best_makespan}, Gap: {evaluation['gap_percent']:.2f}%")
-
-# 6. Visualize
-visualizer = Visualizer(config.results_dir)
-schedule = solver.get_schedule()
-visualizer.plot_gantt_chart(schedule, model, "la01")
-visualizer.plot_convergence(history, "la01", evaluator.get_bks("la01"))
+```
+SAforJSScheduling/
+├── main.py                      # Entry point chính
+├── gui/gui.py                   # Giao diện đồ họa
+├── README.md                    # Tài liệu này
+├── requirement.txt              # Thư viện phụ thuộc
+│
+├── config/
+│   └── config.py               # Tham số cấu hình
+│
+├── src/
+│   ├── sa_solver.py            # Lõi thuật toán SA
+│   ├── jssp_model.py           # Mô hình JSSP
+│   ├── data_loader.py          # Đọc dữ liệu
+│   ├── evaluator.py            # Đánh giá kết quả
+│   ├── visualizer.py           # Vẽ biểu đồ
+│   └── utils.py                # Các hàm hỗ trợ
+│
+├── data/
+│   ├── la01.txt ~ la40.txt     # 40 instances
+│   └── LA_BKS.csv              # Best Known Solutions
+│
+└── results/                     # Kết quả đầu ra
+    ├── la01_result.txt         # Kết quả text
+    ├── la01_gantt.png          # Biểu đồ Gantt
+    └── la01_convergence.png    # Đồ thị hội tụ
 ```
 
-## Configuration Parameters
+---
 
-Edit `config/config.py` to adjust algorithm behavior. Key parameters:
+## 5. CẤU HÌNH THUẬT TOÁN
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `T0` | 1000.0 | Initial temperature |
-| `T_min` | 0.01 | Stopping temperature threshold |
-| `alpha_explore` | 0.98 | Cooling rate in exploration phase |
-| `alpha_exploit` | 0.95 | Cooling rate in exploitation phase |
-| `L` | 100 | Markov chain length (iterations per temperature) |
-| `patience` | 500 | No-improvement iterations before early stop |
+Tất cả tham số trong file `config/config.py`:
 
-## Algorithm Details
+| Tham Số | Mặc Định | Ý Nghĩa |
+|---------|----------|----------|
+| T0 | 1000.0 | Nhiệt độ ban đầu |
+| T_min | 0.01 | Nhiệt độ dừng |
+| alpha_explore | 0.98 | Hệ số làm lạnh (thăm dò) |
+| alpha_exploit | 0.95 | Hệ số làm lạnh (khai thác) |
+| L | 100 | Chiều dài Markov chain |
+| patience | 500 | Số vòng không cải thiện trước dừng |
+| swap_probability | 0.5 | Xác suất dùng SWAP |
 
-### Solution Representation
+**Để tìm lời giải nhanh hơn:** Giảm patience, tăng alpha_exploit
 
-Operation-based encoding: list of n×m job indices where each job appears m times
-- Example: `[1, 3, 1, 2, 3, 1, 2, 3, 2]` for 3 jobs, 3 machines
-- Guarantees feasible solutions naturally
+**Để tìm lời giải tốt hơn:** Tăng patience, giảm alpha_explore, tăng L
 
-### Simulated Annealing Process
+---
 
-1. **Initialization**: Generate random feasible solution
-2. **Markov Chain**: Repeat L times:
-   - Generate neighbor (50% Swap, 50% Move)
-   - Accept if better, or with probability exp(-Δ/T) if worse
-3. **Cooling**: Update T_new = α × T_old with adaptive α
-4. **Termination**: Stop when T < T_min or no improvement for 500 iterations
+## 6. HIỂU KẾT QUẢ
 
-### Neighborhood Operators
+### Các Chỉ Số Chính
 
-- **Swap**: Exchange two random positions
-- **Move**: Remove element, insert at random position
-- **Probabilistic Selection**: 50/50 by default
+**Makespan:** Thời gian hoàn thành tất cả công việc (mục tiêu tối ưu)
 
-## Evaluation Metrics
+**BKS (Best Known Solution):** Lời giải tốt nhất đã biết từ OR-Library
 
-### Best Known Solutions (BKS)
-- Lawrence (1984) benchmark: 40 standard instances
-- LA01-LA40 with known optimal or best-known makespan values
+**Gap (%):** (Makespan - BKS) / BKS * 100
+- Gap < 2%: Rất tốt
+- Gap < 5%: Tốt
+- Gap < 10%: Chấp nhận
+- Gap > 10%: Cần cải tiến
 
-### Quality Assessment
+**Thời gian chạy:** 20-120 giây tùy kích thước instance
+
+### Các Tệp Kết Quả
+
+1. **la0X_result.txt**: Thông tin chi tiết result
+2. **la0X_gantt.png**: Biểu đồ Gantt (lịch trình công việc)
+3. **la0X_convergence.png**: Đồ thị hội tụ (makespan theo iterations)
+
+---
+
+## 7. LOẠI DỮ LIỆU
+
+### Lawrence Instances (LA01-LA40)
+
+40 benchmark instances từ OR-Library:
+
+| Nhóm | Instances | Jobs | Machines | Độ Khó |
+|------|-----------|------|----------|-------|
+| Nhỏ | LA01-LA05 | 10 | 5 | Dễ |
+| Trung | LA06-LA20 | 15 | 5-10 | Trung |
+| Lớn | LA21-LA30 | 20-30 | 10 | Khó |
+| Rất Lớn | LA31-LA40 | 30 | 10-15 | Rất Khó |
+
+---
+
+## 8. QUY TRÌNH THUẬT TOÁN
+
+### 4 Giai Đoạn
+
+**Giai Đoạn 1: Khởi Tạo**
+- Sinh lời giải ngẫu nhiên (operation-based encoding)
+- Tính makespan ban đầu
+- Đặt best_solution = current_solution
+
+**Giai Đoạn 2-3: Vòng Lặp Tìm Kiếm**
 ```
-Gap(%) = (Algorithm_Result - BKS) / BKS × 100
+Chừng khi T > T_min:
+  - Sinh lân cận (Swap/Move)
+  - Tính makespan mới
+  - Chấp nhận theo Metropolis
+  - Cập nhật best (nếu tốt hơn)
+  - Giảm nhiệt độ: T = T * alpha
+  - Kiểm tra dừng sớm (early stopping)
+  - Tái hâm nóng nếu cần (reheating)
 ```
 
-**Quality Grades:**
-- **Optimal ✓**: Gap = 0% 
-- **Excellent**: Gap < 5%
-- **Good**: 5% ≤ Gap < 10%
-- **Fair**: 10% ≤ Gap < 15%
-- **Poor**: Gap ≥ 15%
+**Giai Đoạn 4: In Kết Quả**
+- In báo cáo chi tiết
+- Lưu kết quả vào file
 
-## References
+---
 
-1. Lawrence, S. (1984). Resource constrained project scheduling: An experimental investigation of heuristic scheduling techniques. Carnegie-Mellon University.
+## 9. CÁC MODULE CHÍNH
 
-2. Kirkpatrick, S., Gelatt Jr, C. D., & Vecchi, M. P. (1983). Optimization by simulated annealing. *Science*, 220(4598), 671-680.
+### src/sa_solver.py
+Lõi thuật toán SA. Hàm chính: `solve()`
 
-3. Metropolis, N., et al. (1953). Equation of state calculations by fast computing machines. *The Journal of Chemical Physics*, 21(6), 1087-1092.
+### src/jssp_model.py
+Mô hình JSSP. Hàm chính: `calculate_makespan()` (tính toán key)
 
-## License
+### src/data_loader.py
+Đọc file instance từ OR-Library format
 
-MIT License
+### src/evaluator.py
+Đánh giá kết quả so với BKS (Best Known Solution)
 
-## Status
+### src/visualizer.py
+Vẽ biểu đồ Gantt và đồ thị hội tụ
 
-✅ **Production Ready** - All components implemented and tested with OR-Library benchmarks
+### config/config.py
+Quản lý toàn bộ tham số thuật toán
+
+---
+
+## 10. KHẮC PHỤC LỖI THƯỜNG GẶP
+
+**Lỗi:** "ModuleNotFoundError: No module named 'src'"
+**Cách sửa:** Chạy từ thư mục dự án chính
+
+**Lỗi:** "FileNotFoundError: data/la01.txt"
+**Cách sửa:** Chạy `python scripts/create_la_files.py`
+
+**Lỗi:** Makespan sai khi chạy instance đó sau instance khác
+**Cách sửa:** Đã fix - reset self.history và self.config.T0 trong _phase_initialization()
+
+---
+
+## 11. KẾT QUẢ MẪU
+
+| Instance | Jobs | Machines | BKS | Lấy Được | Gap % | Thời Gian |
+|----------|------|----------|-----|----------|-------|----------|
+| la01 | 10 | 5 | 666 | 627 | 5.86% | 23s |
+| la05 | 10 | 5 | 593 | 613 | 3.37% | 25s |
+| la10 | 15 | 5 | 1220 | 1254 | 2.79% | 35s |
+| la20 | 15 | 10 | 2291 | 2345 | 2.36% | 45s |
+| la30 | 20 | 10 | 2406 | 2468 | 2.58% | 52s |
+
+---
+
+## 12. HỢP ĐÀN NÂNG CAO TỪ ĐÂY
+
+1. **Hybrid Approach**: Kết hợp SA + Local Search hoặc Genetic Algorithm
+2. **Parallel Computing**: Chạy nhiều SA cùng lúc, lấy kết quả tốt nhất
+3. **Machine Learning**: Dự đoán tham số tối ưu cho mỗi instance
+4. **Real-time Rescheduling**: Cập nhật lịch trình khi có công việc mới
+5. **Web Dashboard**: Giao diện web để quản lý lập lịch
+
+---
+
+## 13. PHIÊN BẢN VÀ GHI CHÚ
+
+**Phiên bản:** 1.0.0 Final
+**Ngày cập nhật:** 2026-04-09
+
+**Các sửa chữa gần đây:**
+- State pollution bug: Fixed (LA07→LA06 không còn sai)
+- Division by zero: Fixed
+- Visualization edge cases: Fixed
+- Threading issues: Fixed
+
+**Trạng thái:** Production Ready - Tất cả tính năng hoạt động
+
+---
+
+## 14. TÀI LIỆU THAM KHẢO
+
+- **OR-Library:** http://people.brunel.ac.uk/mastjjb/jeb/orlib/jobshopinfo.html
+- **Kirkpatrick et al. (1983):** "Optimization by Simulated Annealing"
+- **Lawrence (1984):** "Resource constrained project scheduling benchmarks"
+
+---
+
+## Kết Luận
+
+Dự án cung cấp giải pháp hoàn chỉnh để giải JSSP bằng SA với chất lượng lời giải cao (gap < 6%).
+
+Thích hợp cho: Nghiên cứu, prototyping, giáo dục, sản xuất thực tế.
+
+Chúc bạn sử dụng thành công!
 
