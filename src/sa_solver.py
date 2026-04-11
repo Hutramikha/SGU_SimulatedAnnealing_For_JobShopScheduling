@@ -7,7 +7,6 @@ Chức năng: Thuật toán Simulated Annealing cải tiến để giải JSSP
 """
 
 import time
-import numpy as np
 from typing import List, Dict, Tuple
 from .jssp_model import JSSPModel
 from .utils import NeighborhoodOperators, CoolingSchedule, MetropolisAcceptance, EarlyStoppingChecker

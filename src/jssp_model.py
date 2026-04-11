@@ -111,9 +111,12 @@ class JSSPModel:
         
         return schedule, makespan
     
-    def calculate_makespan(self, solution: List[int]) -> int:
+    def calculate_makespan_fast(self, solution: List[int]) -> int:
         """
-        Tính giá trị Makespan (hàm mục tiêu)
+        Tính Makespan một cách tối ưu - KHÔNG tạo schedule dict
+        
+        Được dùng bên trong SA để tối ưu tốc độ (gọi hàng nghìn lần)
+        Độ phức tạp: O(n*m) tính toán, O(1) memory overhead
         
         Args:
             solution: Dãy mã hóa
@@ -121,8 +124,48 @@ class JSSPModel:
         Returns:
             int: Giá trị Makespan
         """
-        _, makespan = self.solution_to_schedule(solution)
-        return makespan
+        job_ready_time = [0] * self.n_jobs
+        machine_ready_time = [0] * self.n_machines
+        job_operation_index = [0] * self.n_jobs
+        
+        max_completion_time = 0
+        
+        for encoded_job in solution:
+            operation_index = job_operation_index[encoded_job]
+            
+            # Truy xuất từ ma trận P, M (O(1))
+            machine_id = int(self.machine_order[encoded_job, operation_index])
+            processing_time = int(self.processing_times[encoded_job, operation_index])
+            
+            # Tính thời điểm bắt đầu
+            start_time = max(job_ready_time[encoded_job], machine_ready_time[machine_id])
+            end_time = start_time + processing_time
+            
+            # Cập nhật trạng thái (không lưu dict)
+            job_ready_time[encoded_job] = end_time
+            machine_ready_time[machine_id] = end_time
+            
+            # Theo dõi completion time cao nhất (chứ không tạo schedule dict)
+            max_completion_time = max(max_completion_time, end_time)
+            
+            job_operation_index[encoded_job] += 1
+        
+        return max_completion_time
+    
+    def calculate_makespan(self, solution: List[int]) -> int:
+        """
+        Tính giá trị Makespan - Entry point chính
+        
+        Sử dụng phiên bản tối ưu (calculate_makespan_fast)
+        cho tốc độ tối đa khi chạy thuật toán SA
+        
+        Args:
+            solution: Dãy mã hóa
+        
+        Returns:
+            int: Giá trị Makespan
+        """
+        return self.calculate_makespan_fast(solution)
     
     def is_valid_solution(self, solution: List[int]) -> bool:
         """
