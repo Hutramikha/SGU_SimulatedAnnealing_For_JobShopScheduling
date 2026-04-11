@@ -13,6 +13,7 @@ from PIL import Image, ImageTk
 import sys
 import random
 import numpy as np
+import time
 
 # Thêm project root vào path (từ parent directory)
 project_root = Path(__file__).parent.parent
@@ -321,8 +322,10 @@ class SAJSSP_GUI:
                 
                 # Chạy SA
                 try:
+                    time_start = time.time()
                     solver = SASolver(model, self.config)
                     best_solution, best_makespan, history = solver.solve()
+                    elapsed_time = time.time() - time_start
                 except Exception as e:
                     raise Exception(f"SA solver failed: {e}")
                 
@@ -342,7 +345,8 @@ class SAJSSP_GUI:
                     'schedule': solver.get_schedule(),
                     'history': history,
                     'model': model,
-                    'solver': solver
+                    'solver': solver,
+                    'elapsed_time': elapsed_time
                 }
                 trial_results.append(trial_result)
                 
@@ -360,9 +364,10 @@ class SAJSSP_GUI:
             # Lưu biểu đồ (chỉ từ best trial)
             try:
                 visualizer = Visualizer(self.config.results_dir)
-                visualizer.plot_gantt_chart(schedule, model, instance_name)
+                chart_suffix = f"_trial{best_trial_index+1}" if num_trials > 1 else ""
+                visualizer.plot_gantt_chart(schedule, model, f"{instance_name}{chart_suffix}")
                 bks = self.evaluator.get_bks(instance_name)
-                visualizer.plot_convergence(history, instance_name, bks)
+                visualizer.plot_convergence(history, instance_name, bks, suffix=chart_suffix)
             except Exception as e:
                 print(f"[WARNING] Visualization failed: {e}")
             
@@ -385,22 +390,28 @@ class SAJSSP_GUI:
                         gap_str = f"{evaluation['gap_percent']:.2f}" if evaluation['gap_percent'] is not None else 'N/A'
                         f.write(f"Gap (%): {gap_str}\n")
                         f.write(f"Quality: {evaluation['quality']}\n")
+                        f.write(f"Time (s): {best_result['elapsed_time']:.3f}\n")
                     else:
                         # Multiple trials - record stats
                         makespans = [r['makespan'] for r in trial_results]
                         gaps = [r['gap_percent'] for r in trial_results if r['gap_percent'] is not None]
+                        times = [r['elapsed_time'] for r in trial_results]
                         best_eval = self.evaluator.evaluate_solution(best_result['makespan'], instance_name)
+                        best_idx = makespans.index(min(makespans))
                         f.write(f"Makespan: {min(makespans)}\n")
                         f.write(f"BKS: {best_eval['bks']}\n")
+                        f.write(f"Best Trial: {best_idx + 1}\n")
                         f.write(f"Number of Trials: {num_trials}\n")
                         f.write(f"Average Makespan: {np.mean(makespans):.2f}\n")
                         if gaps:
                             f.write(f"Gap (%): {min(gaps):.2f}\n")
                             f.write(f"Avg Gap (%): {np.mean(gaps):.2f}\n")
+                        f.write(f"Total Time (s): {sum(times):.3f}\n")
+                        f.write(f"Avg Time per Trial (s): {np.mean(times):.3f}\n")
                         f.write("\nTrial Details:\n")
                         for r in trial_results:
                             gap_str = f"{r['gap_percent']:.2f}" if r['gap_percent'] is not None else 'N/A'
-                            f.write(f"  Trial {r['trial']}: Makespan={r['makespan']}, Gap={gap_str}%\n")
+                            f.write(f"  Trial {r['trial']}: Makespan={r['makespan']}, Gap={gap_str}%, Time={r['elapsed_time']:.3f}s\n")
                     
                     f.write(f"\nSchedule:\n{model.get_schedule_info(best_result['solution'])}\n")
             except Exception as e:
@@ -439,6 +450,7 @@ Makespan:        {result['makespan']}
 BKS:             {evaluation['bks']}
 Gap (%):         {gap_display}
 Chat Luong:      {evaluation['quality']}
+Time (s):        {result['elapsed_time']:.3f}
 
 ========== THONG KE ==========
 Tong Lap:        {history['iterations'][-1] if history['iterations'] else 0}
@@ -455,6 +467,7 @@ Ty Le Chap Nhan: {100*history['accepted_count']/(history['accepted_count']+histo
             # Multiple trials mode (5 trials)
             makespans = [r['makespan'] for r in trial_results]
             gaps = [r['gap_percent'] for r in trial_results if r['gap_percent'] is not None]
+            times = [r['elapsed_time'] for r in trial_results]
             
             best_idx = makespans.index(min(makespans))
             best_result = trial_results[best_idx]
@@ -462,10 +475,11 @@ Ty Le Chap Nhan: {100*history['accepted_count']/(history['accepted_count']+histo
             best_eval = self.evaluator.evaluate_solution(best_result['makespan'], instance_name)
             avg_makespan = np.mean(makespans)
             avg_gap = np.mean(gaps) if gaps else None
+            avg_time = np.mean(times)
             
             # Format trial details
             trial_details = "\n".join([
-                f"  Trial {r['trial']:2d}: C_max={r['makespan']:4d}, Gap={r['gap_percent']:6.2f}%"
+                f"  Trial {r['trial']:2d}: C_max={r['makespan']:4d}, Gap={r['gap_percent']:6.2f}%, Time={r['elapsed_time']:6.3f}s"
                 for r in trial_results
             ])
             
@@ -477,15 +491,18 @@ Ty Le Chap Nhan: {100*history['accepted_count']/(history['accepted_count']+histo
 Instance:        {instance_name.upper()}
 
 TONG HOP:
-  C_max (best):  {min(makespans)}
+  C_max (best):  {min(makespans)}  [Trial {best_idx+1}]
   C_max (avg):   {avg_makespan:.2f}
   BKS:           {best_eval['bks']}
   Gap (best):    {best_gap_str}%
   Gap (avg):     {avg_gap_str}%
+  Time (total):  {sum(times):.3f}s
+  Time (avg):    {avg_time:.3f}s
 
 CHI TIET TUNG TRIAL:
 {trial_details}
 
+BEST TRIAL: Trial {best_idx+1}
 THONG KE TU TRIAL TOT NHAT:
   Tong Lap:      {best_result['history']['iterations'][-1] if best_result['history']['iterations'] else 0}
   Chap Nhan:     {best_result['history']['accepted_count']}
@@ -493,8 +510,8 @@ THONG KE TU TRIAL TOT NHAT:
   Ty Le:         {100*best_result['history']['accepted_count']/(best_result['history']['accepted_count']+best_result['history']['rejected_count']) if (best_result['history']['accepted_count']+best_result['history']['rejected_count']) > 0 else 0:.1f}%
 
 HIEN TRANG:
-- Gantt chart: results/gantt_{instance_name}.png (tu Trial {best_idx+1})
-- Convergence: results/convergence_{instance_name}.png (tu Trial {best_idx+1})
+- Gantt chart: results/gantt_{instance_name}_trial{best_idx+1}.png
+- Convergence: results/convergence_{instance_name}_trial{best_idx+1}.png
 - Results: results/{instance_name}_result.txt
 """
         
