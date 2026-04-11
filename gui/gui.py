@@ -11,6 +11,8 @@ from pathlib import Path
 import threading
 from PIL import Image, ImageTk
 import sys
+import random
+import numpy as np
 
 # Thêm project root vào path (từ parent directory)
 project_root = Path(__file__).parent.parent
@@ -43,6 +45,7 @@ class SAJSSP_GUI:
         # Variables
         self.is_running = False
         self.selected_instance = tk.StringVar(value="la01")
+        self.trial_mode = tk.BooleanVar(value=False)  # 5-trial mode toggle
         
         # Tạo notebook (tabs)
         self.notebook = ttk.Notebook(root)
@@ -91,6 +94,16 @@ class SAJSSP_GUI:
         self.info_var = tk.StringVar(value="Chon 1 instance de xem thong tin")
         ttk.Label(frame_instance, textvariable=self.info_var, 
                  foreground="blue").pack(side=tk.LEFT, padx=20)
+        
+        # === PHẦN 1B: CHỈ ĐỒ CHẠY 5 LẦN (TRIAL MODE) ===
+        frame_trial = ttk.LabelFrame(main_frame, text="Che Do Thuc Nghiem", padding=10)
+        frame_trial.pack(fill=tk.X, pady=10)
+        
+        ttk.Checkbutton(frame_trial, text="CHAY 5 LAN DOC LAP (5 Trials)", 
+                       variable=self.trial_mode).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Label(frame_trial, text="Moi trial su dung hat khac nhau (seeds: 1001-5005)", 
+                 foreground="green").pack(side=tk.LEFT, padx=10)
         
         # === PHẦN 2: THAM SỐ THUẬT TOÁN ===
         frame_params = ttk.LabelFrame(main_frame, text="Tham So Thuat Toan", padding=10)
@@ -257,86 +270,139 @@ class SAJSSP_GUI:
             return
         
         instance_name = self.selected_instance.get()
+        num_trials = 5 if self.trial_mode.get() else 1
         
         # Chạy trong thread riêng
         self.is_running = True
         self.btn_run.config(state=tk.DISABLED)
         self.progress.start()
-        self.status_var.set(f"Dang chay {instance_name.upper()}...")
         
-        thread = threading.Thread(target=self._solve_thread, args=(instance_name,))
+        trial_text = f" (5 Trials)" if num_trials == 5 else ""
+        self.status_var.set(f"Dang chay {instance_name.upper()}{trial_text}...")
+        
+        thread = threading.Thread(target=self._solve_thread, args=(instance_name, num_trials))
         thread.daemon = True
         thread.start()
     
-    def _solve_thread(self, instance_name):
-        """Thread chạy thuật toán"""
+    def _solve_thread(self, instance_name, num_trials=1):
+        """Thread chạy thuật toán (1 hoặc 5 lần)"""
         try:
-            # Reset ALL objects mỗi lần chạy để tránh cache issues
-            # ← Đây là nguyên nhân lỗi: LA07 rồi LA06, state bị cache!
-            self.evaluator = Evaluator()
-            self.data_loader = DataLoader()  # ← Reset DataLoader
-            print(f"[DEBUG] All objects reset. Instance: {instance_name}")
+            # Chuẩn bị dữ liệu cho trial loop
+            trial_results = []
+            best_makespan_overall = float('inf')
+            best_trial_index = -1
             
-            # Load dữ liệu
-            try:
-                data = self.data_loader.load_instance(f"{instance_name}.txt")
-                print(f"[DEBUG] Data loaded. Jobs: {data['n_jobs']}, Machines: {data['n_machines']}")
-            except Exception as e:
-                raise Exception(f"Data load failed: {e}")
-            
-            # Tạo model
-            try:
-                model = JSSPModel(data['n_jobs'], data['n_machines'],
-                                data['processing_times'], data['machine_order'])
-            except Exception as e:
-                raise Exception(f"Model creation failed: {e}")
-            
-            # Chạy SA
-            try:
-                solver = SASolver(model, self.config)
-                best_solution, best_makespan, history = solver.solve()
-                print(f"[DEBUG] SA solve done. Best makespan: {best_makespan}")
-            except Exception as e:
-                raise Exception(f"SA solver failed: {e}")
-            
-            # Đánh giá
-            try:
-                bks = self.evaluator.get_bks(instance_name)
-                print(f"[DEBUG] Got BKS: {bks}")
+            # Loop: Chạy 1 lần hoặc 5 lần
+            for trial_idx in range(num_trials):
+                # Seed management cho reproducibility
+                if num_trials > 1:
+                    seed = 1001 + trial_idx * 1001  # 1001, 2002, 3003, 4004, 5005
+                    random.seed(seed)
+                    np.random.seed(seed)
+                    self.root.after(0, lambda t=trial_idx, n=num_trials: 
+                                   self.status_var.set(f"Trial {t+1}/{n}..."))
                 
-                evaluation = self.evaluator.evaluate_solution(best_makespan, instance_name)
-                print(f"[DEBUG] Evaluation: gap={evaluation.get('gap_percent', 'ERROR')}")
-            except Exception as e:
-                raise Exception(f"Evaluation failed: {e}")
+                # Reset ALL objects để tránh cache issues
+                self.evaluator = Evaluator()
+                self.data_loader = DataLoader()
+                
+                # Load dữ liệu
+                try:
+                    data = self.data_loader.load_instance(f"{instance_name}.txt")
+                except Exception as e:
+                    raise Exception(f"Data load failed: {e}")
+                
+                # Tạo model
+                try:
+                    model = JSSPModel(data['n_jobs'], data['n_machines'],
+                                    data['processing_times'], data['machine_order'])
+                except Exception as e:
+                    raise Exception(f"Model creation failed: {e}")
+                
+                # Chạy SA
+                try:
+                    solver = SASolver(model, self.config)
+                    best_solution, best_makespan, history = solver.solve()
+                except Exception as e:
+                    raise Exception(f"SA solver failed: {e}")
+                
+                # Đánh giá
+                try:
+                    bks = self.evaluator.get_bks(instance_name)
+                    evaluation = self.evaluator.evaluate_solution(best_makespan, instance_name)
+                except Exception as e:
+                    raise Exception(f"Evaluation failed: {e}")
+                
+                # Lưu kết quả trial này
+                trial_result = {
+                    'trial': trial_idx + 1,
+                    'makespan': best_makespan,
+                    'gap_percent': evaluation.get('gap_percent', None),
+                    'solution': best_solution,
+                    'schedule': solver.get_schedule(),
+                    'history': history,
+                    'model': model,
+                    'solver': solver
+                }
+                trial_results.append(trial_result)
+                
+                # Track best overall
+                if best_makespan < best_makespan_overall:
+                    best_makespan_overall = best_makespan
+                    best_trial_index = trial_idx
             
-            # Lưu biểu đồ
+            # Xử lý kết quả từ model và solver tốt nhất
+            best_result = trial_results[best_trial_index]
+            model = best_result['model']
+            schedule = best_result['schedule']
+            history = best_result['history']
+            
+            # Lưu biểu đồ (chỉ từ best trial)
             try:
                 visualizer = Visualizer(self.config.results_dir)
-                schedule = solver.get_schedule()
                 visualizer.plot_gantt_chart(schedule, model, instance_name)
                 bks = self.evaluator.get_bks(instance_name)
                 visualizer.plot_convergence(history, instance_name, bks)
             except Exception as e:
                 print(f"[WARNING] Visualization failed: {e}")
             
-            # Hiển thị kết quả
+            # Format kết quả
             try:
-                result_text = self._format_result(instance_name, evaluation, history)
+                result_text = self._format_result(instance_name, trial_results)
             except Exception as e:
                 raise Exception(f"Format result failed: {e}")
             
-            # Lưu kết quả vào file (cùng format như main.py)
+            # Lưu kết quả vào file
             try:
                 result_file = self.config.results_dir / f"{instance_name}_result.txt"
                 with open(result_file, 'w', encoding='utf-8') as f:
                     f.write(f"Instance: {instance_name.upper()}\n")
-                    f.write(f"Makespan: {best_makespan}\n")
-                    f.write(f"BKS: {evaluation['bks']}\n")
-                    # Check "is not None" để tránh 0 bị xem là False
-                    gap_str = f"{evaluation['gap_percent']:.2f}" if evaluation['gap_percent'] is not None else 'N/A'
-                    f.write(f"Gap (%): {gap_str}\n")
-                    f.write(f"Quality: {evaluation['quality']}\n\n")
-                    f.write(f"Schedule:\n{model.get_schedule_info(best_solution)}\n")
+                    
+                    if num_trials == 1:
+                        evaluation = self.evaluator.evaluate_solution(best_result['makespan'], instance_name)
+                        f.write(f"Makespan: {best_result['makespan']}\n")
+                        f.write(f"BKS: {evaluation['bks']}\n")
+                        gap_str = f"{evaluation['gap_percent']:.2f}" if evaluation['gap_percent'] is not None else 'N/A'
+                        f.write(f"Gap (%): {gap_str}\n")
+                        f.write(f"Quality: {evaluation['quality']}\n")
+                    else:
+                        # Multiple trials - record stats
+                        makespans = [r['makespan'] for r in trial_results]
+                        gaps = [r['gap_percent'] for r in trial_results if r['gap_percent'] is not None]
+                        best_eval = self.evaluator.evaluate_solution(best_result['makespan'], instance_name)
+                        f.write(f"Makespan: {min(makespans)}\n")
+                        f.write(f"BKS: {best_eval['bks']}\n")
+                        f.write(f"Number of Trials: {num_trials}\n")
+                        f.write(f"Average Makespan: {np.mean(makespans):.2f}\n")
+                        if gaps:
+                            f.write(f"Gap (%): {min(gaps):.2f}\n")
+                            f.write(f"Avg Gap (%): {np.mean(gaps):.2f}\n")
+                        f.write("\nTrial Details:\n")
+                        for r in trial_results:
+                            gap_str = f"{r['gap_percent']:.2f}" if r['gap_percent'] is not None else 'N/A'
+                            f.write(f"  Trial {r['trial']}: Makespan={r['makespan']}, Gap={gap_str}%\n")
+                    
+                    f.write(f"\nSchedule:\n{model.get_schedule_info(best_result['solution'])}\n")
             except Exception as e:
                 raise Exception(f"Save result failed: {e}")
             
@@ -344,7 +410,6 @@ class SAJSSP_GUI:
             self.root.after(0, self._update_result_ui, result_text)
             
         except Exception as e:
-            # Capture exception trong default argument để tránh closure issue
             error_msg = f"{type(e).__name__}: {str(e)}"
             print(f"[ERROR] _solve_thread: {error_msg}")
             import traceback
@@ -355,16 +420,22 @@ class SAJSSP_GUI:
             self.is_running = False
             self.root.after(0, self._finish_run)
     
-    def _format_result(self, instance_name, evaluation, history):
-        """Format kết quả"""
-        # Tính gap_display trước để tránh syntax error trong f-string format specifier
-        # Check "is not None" để tránh 0 bị xem là False
-        gap_display = f"{evaluation['gap_percent']:.2f}" if evaluation['gap_percent'] is not None else 'N/A'
+    def _format_result(self, instance_name, trial_results):
+        """Format kết quả (hỗ trợ 1 trial hoặc 5 trials)"""
+        num_trials = len(trial_results)
         
-        result = f"""
-========== KET QUA ==========
+        if num_trials == 1:
+            # Single run mode
+            result = trial_results[0]
+            evaluation = self.evaluator.evaluate_solution(result['makespan'], instance_name)
+            history = result['history']
+            
+            gap_display = f"{evaluation['gap_percent']:.2f}" if evaluation['gap_percent'] is not None else 'N/A'
+            
+            result_text = f"""
+========== KET QUA (1 LAN CHAY) ==========
 Instance:        {instance_name.upper()}
-Makespan:        {evaluation['makespan']}
+Makespan:        {result['makespan']}
 BKS:             {evaluation['bks']}
 Gap (%):         {gap_display}
 Chat Luong:      {evaluation['quality']}
@@ -380,7 +451,54 @@ Ty Le Chap Nhan: {100*history['accepted_count']/(history['accepted_count']+histo
 - Convergence: results/convergence_{instance_name}.png
 - Results: results/{instance_name}_result.txt
 """
-        return result
+        else:
+            # Multiple trials mode (5 trials)
+            makespans = [r['makespan'] for r in trial_results]
+            gaps = [r['gap_percent'] for r in trial_results if r['gap_percent'] is not None]
+            
+            best_idx = makespans.index(min(makespans))
+            best_result = trial_results[best_idx]
+            
+            best_eval = self.evaluator.evaluate_solution(best_result['makespan'], instance_name)
+            avg_makespan = np.mean(makespans)
+            avg_gap = np.mean(gaps) if gaps else None
+            
+            # Format trial details
+            trial_details = "\n".join([
+                f"  Trial {r['trial']:2d}: C_max={r['makespan']:4d}, Gap={r['gap_percent']:6.2f}%"
+                for r in trial_results
+            ])
+            
+            avg_gap_str = f"{avg_gap:.2f}" if avg_gap is not None else 'N/A'
+            best_gap_str = f"{best_eval['gap_percent']:.2f}" if best_eval['gap_percent'] is not None else 'N/A'
+            
+            result_text = f"""
+========== KET QUA (5 TRIALS) ==========
+Instance:        {instance_name.upper()}
+
+TONG HOP:
+  C_max (best):  {min(makespans)}
+  C_max (avg):   {avg_makespan:.2f}
+  BKS:           {best_eval['bks']}
+  Gap (best):    {best_gap_str}%
+  Gap (avg):     {avg_gap_str}%
+
+CHI TIET TUNG TRIAL:
+{trial_details}
+
+THONG KE TU TRIAL TOT NHAT:
+  Tong Lap:      {best_result['history']['iterations'][-1] if best_result['history']['iterations'] else 0}
+  Chap Nhan:     {best_result['history']['accepted_count']}
+  Tu Choi:       {best_result['history']['rejected_count']}
+  Ty Le:         {100*best_result['history']['accepted_count']/(best_result['history']['accepted_count']+best_result['history']['rejected_count']) if (best_result['history']['accepted_count']+best_result['history']['rejected_count']) > 0 else 0:.1f}%
+
+HIEN TRANG:
+- Gantt chart: results/gantt_{instance_name}.png (tu Trial {best_idx+1})
+- Convergence: results/convergence_{instance_name}.png (tu Trial {best_idx+1})
+- Results: results/{instance_name}_result.txt
+"""
+        
+        return result_text
     
     def _update_result_ui(self, result_text):
         """Cập nhật UI kết quả"""
@@ -481,18 +599,28 @@ Ty Le Chap Nhan: {100*history['accepted_count']/(history['accepted_count']+histo
             try:
                 with open(result_file, 'r', encoding='utf-8') as f:
                     content = f.read()
-                    # Parse básico
+                    # Parse chính xác
                     makespan = "N/A"
                     bks = "N/A"
                     gap = "N/A"
                     
-                    for line in content.split('\n'):
+                    lines = content.split('\n')
+                    for i, line in enumerate(lines):
                         if line.startswith("Makespan:"):
-                            makespan = line.split()[-1]
+                            try:
+                                makespan = line.split(":")[1].strip()
+                            except:
+                                pass
                         elif line.startswith("BKS:"):
-                            bks = line.split()[-1]
-                        elif line.startswith("Gap"):
-                            gap = line.split()[-1].replace("%", "")
+                            try:
+                                bks = line.split(":")[1].strip()
+                            except:
+                                pass
+                        elif "Gap (%)" in line and "Avg" not in line:  # Lấy Gap đầu tiên (không phải Avg)
+                            try:
+                                gap = line.split(":")[1].strip().replace("%", "")
+                            except:
+                                pass
                     
                     # Thêm vào tree
                     self.results_tree.insert("", "end", 
