@@ -27,7 +27,7 @@ class SAConfig:
         self.patience = 500        # Số vòng lặp không cải thiện trước khi dừng sớm
         self.improvement_threshold = 0.01  # Tỷ lệ cải thiện tối thiểu (%)
         self.reheating_enabled = True      # Bật/tắt cơ chế hâm nóng lại
-        self.reheating_factor = 0.9        # Hệ số hâm nóng lại (T_new = T_old * reheating_factor)
+        self.reheating_factor = 0.85       # Hệ số hâm nóng lại (T_new = T_old / 0.85 ≈ 1.176x tăng)
         
         # ==================== TOÁN TỬ LÂN CẬN ====================
         self.swap_probability = 0.5   # Xác suất sử dụng toán tử Swap (50% Swap, 50% Move)

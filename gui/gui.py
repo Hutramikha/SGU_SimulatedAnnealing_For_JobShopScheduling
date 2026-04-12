@@ -732,13 +732,27 @@ HIEN TRANG:
             try:
                 with open(result_file, 'r', encoding='utf-8') as f:
                     content = f.read()
+                    
                     # Parse chính xác
                     makespan = "N/A"
                     bks = "N/A"
                     gap = "N/A"
                     
                     lines = content.split('\n')
+                    
+                    # Cho multi-trial, chỉ parse phần trước "CHI TIET TUNG TRIAL"
+                    chi_tiet_idx = -1
                     for i, line in enumerate(lines):
+                        if "CHI TIET TUNG TRIAL" in line:
+                            chi_tiet_idx = i
+                            break
+                    
+                    # Parse từ đầu tới phần chi tiết (nếu không có chi tiết thì parse hết)
+                    parse_end = chi_tiet_idx if chi_tiet_idx >= 0 else len(lines)
+                    
+                    for i in range(parse_end):
+                        line = lines[i]
+                        
                         if line.startswith("Makespan:"):
                             try:
                                 makespan = line.split(":")[1].strip()
@@ -749,11 +763,12 @@ HIEN TRANG:
                                 bks = line.split(":")[1].strip()
                             except:
                                 pass
-                        elif "Gap (%)" in line and "Avg" not in line:  # Lấy Gap đầu tiên (không phải Avg)
-                            try:
-                                gap = line.split(":")[1].strip().replace("%", "")
-                            except:
-                                pass
+                        elif line.strip().startswith("Gap (%)"):  # Chỉ "Gap (%): " (không phải "Avg Gap (%)")
+                            if "Avg" not in line:
+                                try:
+                                    gap = line.split(":")[1].strip().replace("%", "").strip()
+                                except:
+                                    pass
                     
                     # Thêm vào tree (thêm cột Mode)
                     self.results_tree.insert("", "end", 
