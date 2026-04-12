@@ -21,7 +21,7 @@ class SAConfig:
         self.alpha_exploit = 0.95  # Hệ số làm lạnh giai đoạn khai thác (exploitation)
         
         # ==================== MARKOV CHAIN ====================
-        self.L = 100               # Số vòng lặp tại mỗi mức nhiệt độ (Markov chain length)
+        self.L = 150               # Số vòng lặp tại mỗi mức nhiệt độ (Markov chain length)
         
         # ==================== EARLY STOPPING & REHEATING ====================
         self.patience = 500        # Số vòng lặp không cải thiện trước khi dừng sớm

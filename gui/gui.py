@@ -179,18 +179,20 @@ class SAJSSP_GUI:
         paned.add(frame_list, weight=1)
         
         # Treeview danh sách
-        columns = ("Instance", "Makespan", "BKS", "Gap(%)")
+        columns = ("Instance", "Makespan", "BKS", "Gap(%)", "Mode")
         self.results_tree = ttk.Treeview(frame_list, columns=columns, height=15, show="tree headings")
         self.results_tree.column("#0", width=0)
-        self.results_tree.column("Instance", anchor=tk.W, width=80)
-        self.results_tree.column("Makespan", anchor=tk.CENTER, width=80)
-        self.results_tree.column("BKS", anchor=tk.CENTER, width=60)
+        self.results_tree.column("Instance", anchor=tk.W, width=70)
+        self.results_tree.column("Makespan", anchor=tk.CENTER, width=75)
+        self.results_tree.column("BKS", anchor=tk.CENTER, width=55)
         self.results_tree.column("Gap(%)", anchor=tk.CENTER, width=60)
+        self.results_tree.column("Mode", anchor=tk.CENTER, width=70)
         
         self.results_tree.heading("Instance", text="Instance")
         self.results_tree.heading("Makespan", text="Makespan")
         self.results_tree.heading("BKS", text="BKS")
         self.results_tree.heading("Gap(%)", text="Gap(%)")
+        self.results_tree.heading("Mode", text="Mode")
         
         self.results_tree.bind("<<TreeviewSelect>>", self.on_result_select)
         
@@ -240,11 +242,16 @@ class SAJSSP_GUI:
                                          command=self.show_convergence, state=tk.DISABLED)
         self.btn_convergence.pack(side=tk.LEFT, padx=3)
         
+        self.btn_result = ttk.Button(frame_charts, text="Xem Ket Qua Chi Tiet",
+                                    command=self.show_result_file, state=tk.DISABLED)
+        self.btn_result.pack(side=tk.LEFT, padx=3)
+        
         ttk.Button(frame_charts, text="Mo Folder Results",
                   command=self.open_results_folder).pack(side=tk.LEFT, padx=3)
         
         # Lưu instance hiện tại
         self.current_selected_instance = None
+        self.current_selected_mode = None
         
         # Load danh sách ban đầu
         self.load_results_list()
@@ -288,6 +295,9 @@ class SAJSSP_GUI:
     def _solve_thread(self, instance_name, num_trials=1):
         """Thread chạy thuật toán (1 hoặc 5 lần)"""
         try:
+            # Xác định mode: single (1 lần) hay multi (5 lần)
+            mode = "multi" if num_trials > 1 else "single"
+            
             # Chuẩn bị dữ liệu cho trial loop
             trial_results = []
             best_makespan_overall = float('inf')
@@ -361,43 +371,72 @@ class SAJSSP_GUI:
             schedule = best_result['schedule']
             history = best_result['history']
             
-            # Lưu biểu đồ (chỉ từ best trial)
+            # Naming convention dựa trên mode
+            if mode == "single":
+                chart_name = instance_name
+                result_filename = f"{instance_name}_result.txt"
+            else:  # multi
+                chart_name = f"{instance_name}_trials"
+                result_filename = f"{instance_name}_trials_result.txt"
+            
+            # Lưu biểu đồ (chỉ từ best trial, không thêm trial number vào tên)
             try:
                 visualizer = Visualizer(self.config.results_dir)
-                chart_suffix = f"_trial{best_trial_index+1}" if num_trials > 1 else ""
-                visualizer.plot_gantt_chart(schedule, model, f"{instance_name}{chart_suffix}")
+                visualizer.plot_gantt_chart(schedule, model, chart_name)
                 bks = self.evaluator.get_bks(instance_name)
-                visualizer.plot_convergence(history, instance_name, bks, suffix=chart_suffix)
+                visualizer.plot_convergence(history, chart_name, bks)
             except Exception as e:
                 print(f"[WARNING] Visualization failed: {e}")
             
             # Format kết quả
             try:
-                result_text = self._format_result(instance_name, trial_results)
+                result_text = self._format_result(instance_name, trial_results, mode)
             except Exception as e:
                 raise Exception(f"Format result failed: {e}")
             
             # Lưu kết quả vào file
             try:
-                result_file = self.config.results_dir / f"{instance_name}_result.txt"
+                result_file = self.config.results_dir / result_filename
                 with open(result_file, 'w', encoding='utf-8') as f:
                     f.write(f"Instance: {instance_name.upper()}\n")
+                    f.write(f"{'='*80}\n\n")
                     
-                    if num_trials == 1:
+                    if mode == "single":
                         evaluation = self.evaluator.evaluate_solution(best_result['makespan'], instance_name)
+                        f.write(f"SINGLE RUN MODE\n")
+                        f.write(f"{'-'*80}\n")
                         f.write(f"Makespan: {best_result['makespan']}\n")
                         f.write(f"BKS: {evaluation['bks']}\n")
                         gap_str = f"{evaluation['gap_percent']:.2f}" if evaluation['gap_percent'] is not None else 'N/A'
                         f.write(f"Gap (%): {gap_str}\n")
                         f.write(f"Quality: {evaluation['quality']}\n")
-                        f.write(f"Time (s): {best_result['elapsed_time']:.3f}\n")
-                    else:
+                        f.write(f"Time (s): {best_result['elapsed_time']:.3f}\n\n")
+                        
+                        # Chi tiết quá trình chạy
+                        history = best_result['history']
+                        f.write(f"QUA TRINH CHAY:\n")
+                        f.write(f"  Tong Lap: {history['iterations'][-1] if history['iterations'] else 0}\n")
+                        f.write(f"  Chap Nhan: {history['accepted_count']}\n")
+                        f.write(f"  Tu Choi: {history['rejected_count']}\n")
+                        f.write(f"  Ty Le Chap Nhan: {100*history['accepted_count']/(history['accepted_count']+history['rejected_count']) if (history['accepted_count']+history['rejected_count']) > 0 else 0:.1f}%\n\n")
+                        
+                        # Lịch sử makespan
+                        if history['makespan']:
+                            f.write(f"LICH SU MAKESPAN:\n")
+                            f.write(f"  Kich Thuoc: {len(history['makespan'])}\n")
+                            f.write(f"  Dau: {history['makespan'][0]}\n")
+                            f.write(f"  Cuoi (Best): {history['makespan'][-1]}\n")
+                            f.write(f"  Cai Thien: {history['makespan'][0] - history['makespan'][-1]}\n\n")
+                    else:  # multi
                         # Multiple trials - record stats
                         makespans = [r['makespan'] for r in trial_results]
                         gaps = [r['gap_percent'] for r in trial_results if r['gap_percent'] is not None]
                         times = [r['elapsed_time'] for r in trial_results]
                         best_eval = self.evaluator.evaluate_solution(best_result['makespan'], instance_name)
                         best_idx = makespans.index(min(makespans))
+                        
+                        f.write(f"MULTI-TRIAL MODE (5 RUNS)\n")
+                        f.write(f"{'-'*80}\n")
                         f.write(f"Makespan: {min(makespans)}\n")
                         f.write(f"BKS: {best_eval['bks']}\n")
                         f.write(f"Best Trial: {best_idx + 1}\n")
@@ -407,13 +446,36 @@ class SAJSSP_GUI:
                             f.write(f"Gap (%): {min(gaps):.2f}\n")
                             f.write(f"Avg Gap (%): {np.mean(gaps):.2f}\n")
                         f.write(f"Total Time (s): {sum(times):.3f}\n")
-                        f.write(f"Avg Time per Trial (s): {np.mean(times):.3f}\n")
-                        f.write("\nTrial Details:\n")
+                        f.write(f"Avg Time per Trial (s): {np.mean(times):.3f}\n\n")
+                        
+                        # Chi tiết từng trial
+                        f.write(f"CHI TIET TUNG TRIAL:\n")
+                        f.write(f"{'-'*80}\n\n")
                         for r in trial_results:
                             gap_str = f"{r['gap_percent']:.2f}" if r['gap_percent'] is not None else 'N/A'
-                            f.write(f"  Trial {r['trial']}: Makespan={r['makespan']}, Gap={gap_str}%, Time={r['elapsed_time']:.3f}s\n")
+                            history = r['history']
+                            
+                            f.write(f"TRIAL {r['trial']}:\n")
+                            f.write(f"  Makespan: {r['makespan']}\n")
+                            f.write(f"  Gap (%): {gap_str}%\n")
+                            f.write(f"  Time (s): {r['elapsed_time']:.3f}\n")
+                            f.write(f"  \n")
+                            f.write(f"  Qua Trinh Chay:\n")
+                            f.write(f"    Tong Lap: {history['iterations'][-1] if history['iterations'] else 0}\n")
+                            f.write(f"    Chap Nhan: {history['accepted_count']}\n")
+                            f.write(f"    Tu Choi: {history['rejected_count']}\n")
+                            f.write(f"    Ty Le Chap Nhan: {100*history['accepted_count']/(history['accepted_count']+history['rejected_count']) if (history['accepted_count']+history['rejected_count']) > 0 else 0:.1f}%\n")
+                            
+                            if history['makespan']:
+                                f.write(f"    Lich Su Makespan:\n")
+                                f.write(f"      Dau: {history['makespan'][0]}\n")
+                                f.write(f"      Cuoi (Best): {history['makespan'][-1]}\n")
+                                f.write(f"      Cai Thien: {history['makespan'][0] - history['makespan'][-1]}\n")
+                            f.write(f"\n")
                     
-                    f.write(f"\nSchedule:\n{model.get_schedule_info(best_result['solution'])}\n")
+                    f.write(f"{'='*80}\n")
+                    f.write(f"Schedule:\n")
+                    f.write(f"{model.get_schedule_info(best_result['solution'])}\n")
             except Exception as e:
                 raise Exception(f"Save result failed: {e}")
             
@@ -431,11 +493,11 @@ class SAJSSP_GUI:
             self.is_running = False
             self.root.after(0, self._finish_run)
     
-    def _format_result(self, instance_name, trial_results):
+    def _format_result(self, instance_name, trial_results, mode="single"):
         """Format kết quả (hỗ trợ 1 trial hoặc 5 trials)"""
         num_trials = len(trial_results)
         
-        if num_trials == 1:
+        if mode == "single":
             # Single run mode
             result = trial_results[0]
             evaluation = self.evaluator.evaluate_solution(result['makespan'], instance_name)
@@ -463,7 +525,7 @@ Ty Le Chap Nhan: {100*history['accepted_count']/(history['accepted_count']+histo
 - Convergence: results/convergence_{instance_name}.png
 - Results: results/{instance_name}_result.txt
 """
-        else:
+        else:  # multi
             # Multiple trials mode (5 trials)
             makespans = [r['makespan'] for r in trial_results]
             gaps = [r['gap_percent'] for r in trial_results if r['gap_percent'] is not None]
@@ -487,7 +549,7 @@ Ty Le Chap Nhan: {100*history['accepted_count']/(history['accepted_count']+histo
             best_gap_str = f"{best_eval['gap_percent']:.2f}" if best_eval['gap_percent'] is not None else 'N/A'
             
             result_text = f"""
-========== KET QUA (5 TRIALS) ==========
+========== KET QUA (5 TRIALS - MULTI-TRIAL MODE) ==========
 Instance:        {instance_name.upper()}
 
 TONG HOP:
@@ -510,9 +572,9 @@ THONG KE TU TRIAL TOT NHAT:
   Ty Le:         {100*best_result['history']['accepted_count']/(best_result['history']['accepted_count']+best_result['history']['rejected_count']) if (best_result['history']['accepted_count']+best_result['history']['rejected_count']) > 0 else 0:.1f}%
 
 HIEN TRANG:
-- Gantt chart: results/gantt_{instance_name}_trial{best_idx+1}.png
-- Convergence: results/convergence_{instance_name}_trial{best_idx+1}.png
-- Results: results/{instance_name}_result.txt
+- Gantt chart: results/gantt_{instance_name}_trials.png
+- Convergence: results/convergence_{instance_name}_trials.png
+- Results: results/{instance_name}_trials_result.txt
 """
         
         return result_text
@@ -530,6 +592,33 @@ HIEN TRANG:
         # Tự động reload danh sách kết quả
         self.load_results_list()
     
+    def show_result_file(self):
+        """Mở file kết quả chi tiết"""
+        if not self.current_selected_instance or not self.current_selected_mode:
+            messagebox.showwarning("Canh Bao", "Hay chon mot ket qua truoc!")
+            return
+        
+        instance_name = self.current_selected_instance
+        mode = self.current_selected_mode
+        
+        # Xác định file name dựa trên mode
+        if mode == "Multi-Trial":
+            result_file = Path(self.config.results_dir) / f"{instance_name}_trials_result.txt"
+        else:
+            result_file = Path(self.config.results_dir) / f"{instance_name}_result.txt"
+        
+        if not result_file.exists():
+            messagebox.showwarning("Canh Bao", f"File khong ton tai!\n{result_file}")
+            return
+        
+        # Mở với ứng dụng mặc định
+        import subprocess
+        import os
+        if sys.platform == 'win32':
+            os.startfile(str(result_file))
+        else:
+            subprocess.Popen(['xdg-open', str(result_file)])
+    
     def show_gantt(self):
         """Hiển thị Gantt chart"""
         if not self.current_selected_instance:
@@ -537,10 +626,17 @@ HIEN TRANG:
             return
         
         instance_name = self.current_selected_instance
-        gantt_file = Path(self.config.results_dir) / f"gantt_{instance_name}.png"
         
-        if not gantt_file.exists():
-            messagebox.showwarning("Canh Bao", f"File khong ton tai!\n{gantt_file}")
+        # Thử tìm file: nếu là multi-trial thì tìm _trials, nếu không thì tìm single
+        gantt_file_multi = Path(self.config.results_dir) / f"gantt_{instance_name}_trials.png"
+        gantt_file_single = Path(self.config.results_dir) / f"gantt_{instance_name}.png"
+        
+        if gantt_file_multi.exists():
+            gantt_file = gantt_file_multi
+        elif gantt_file_single.exists():
+            gantt_file = gantt_file_single
+        else:
+            messagebox.showwarning("Canh Bao", f"File khong ton tai!")
             return
         
         # Mở với ứng dụng mặc định
@@ -558,10 +654,17 @@ HIEN TRANG:
             return
         
         instance_name = self.current_selected_instance
-        convergence_file = Path(self.config.results_dir) / f"convergence_{instance_name}.png"
         
-        if not convergence_file.exists():
-            messagebox.showwarning("Canh Bao", f"File khong ton tai!\n{convergence_file}")
+        # Thử tìm file: nếu là multi-trial thì tìm _trials, nếu không thì tìm single
+        convergence_file_multi = Path(self.config.results_dir) / f"convergence_{instance_name}_trials.png"
+        convergence_file_single = Path(self.config.results_dir) / f"convergence_{instance_name}.png"
+        
+        if convergence_file_multi.exists():
+            convergence_file = convergence_file_multi
+        elif convergence_file_single.exists():
+            convergence_file = convergence_file_single
+        else:
+            messagebox.showwarning("Canh Bao", f"File khong ton tai!")
             return
         
         # Mở với ứng dụng mặc định
@@ -598,8 +701,15 @@ HIEN TRANG:
         
         results_dir = Path(self.config.results_dir)
         
-        # Tìm tất cả file gantt_*.txt hoặc convergence_*.txt
-        result_files = sorted(results_dir.glob("*_result.txt"))
+        # Tìm tất cả file *_result.txt và *_trials_result.txt
+        result_files_single = sorted(results_dir.glob("*_result.txt"))
+        result_files_multi = sorted(results_dir.glob("*_trials_result.txt"))
+        
+        # Lọc ra những file _result.txt mà không phải _trials_result.txt
+        result_files_single = [f for f in result_files_single if not f.name.endswith("_trials_result.txt")]
+        
+        # Merge và sort
+        result_files = sorted(result_files_single + result_files_multi)
         
         if not result_files:
             self.result_text.delete(1.0, tk.END)
@@ -610,7 +720,13 @@ HIEN TRANG:
         
         # Duyệt qua từng file kết quả
         for result_file in result_files:
-            instance_name = result_file.stem.replace("_result", "")
+            # Xác định mode dựa trên tên file
+            if result_file.name.endswith("_trials_result.txt"):
+                instance_name = result_file.stem.replace("_trials_result", "")
+                mode = "Multi-Trial"
+            else:
+                instance_name = result_file.stem.replace("_result", "")
+                mode = "Single"
             
             # Đọc file kết quả để lấy Makespan, BKS, Gap
             try:
@@ -639,9 +755,9 @@ HIEN TRANG:
                             except:
                                 pass
                     
-                    # Thêm vào tree
+                    # Thêm vào tree (thêm cột Mode)
                     self.results_tree.insert("", "end", 
-                                            values=(instance_name.upper(), makespan, bks, gap),
+                                            values=(instance_name.upper(), makespan, bks, gap, mode),
                                             tags=("oddrow" if len(result_files) % 2 == 0 else "evenrow",))
             except Exception as e:
                 print(f"Loi doc file {result_file}: {e}")
@@ -661,18 +777,26 @@ HIEN TRANG:
         
         if values:
             instance_name = values[0].lower()
+            mode = values[4] if len(values) > 4 else "Single"  # Get Mode column
+            
             self.current_selected_instance = instance_name
+            self.current_selected_mode = mode
             
             # Load kết quả chi tiết
-            self.display_result_detail(instance_name)
+            self.display_result_detail(instance_name, mode)
             
             # Bật nút xem biểu đồ
             self.btn_gantt.config(state=tk.NORMAL)
             self.btn_convergence.config(state=tk.NORMAL)
+            self.btn_result.config(state=tk.NORMAL)
     
-    def display_result_detail(self, instance_name):
+    def display_result_detail(self, instance_name, mode="Single"):
         """Hiển thị chi tiết kết quả"""
-        result_file = Path(self.config.results_dir) / f"{instance_name}_result.txt"
+        # Xác định file name dựa trên mode
+        if mode == "Multi-Trial":
+            result_file = Path(self.config.results_dir) / f"{instance_name}_trials_result.txt"
+        else:
+            result_file = Path(self.config.results_dir) / f"{instance_name}_result.txt"
         
         if result_file.exists():
             with open(result_file, 'r', encoding='utf-8') as f:
@@ -698,14 +822,20 @@ HIEN TRANG:
             return
         
         instance_name = values[0].lower()
+        mode = values[4] if len(values) > 4 else "Single"  # Get Mode column
         
         # Xác nhận xóa
-        if messagebox.askyesno("Xac Nhan", f"Ban chac chan muon xoa ket qua {instance_name.upper()}?"):
+        if messagebox.askyesno("Xac Nhan", f"Ban chac chan muon xoa ket qua {instance_name.upper()} ({mode})?"):
             try:
-                # Xóa các file liên quan
-                result_file = Path(self.config.results_dir) / f"{instance_name}_result.txt"
-                gantt_file = Path(self.config.results_dir) / f"gantt_{instance_name}.png"
-                convergence_file = Path(self.config.results_dir) / f"convergence_{instance_name}.png"
+                # Xác định file dựa trên mode
+                if mode == "Multi-Trial":
+                    result_file = Path(self.config.results_dir) / f"{instance_name}_trials_result.txt"
+                    gantt_file = Path(self.config.results_dir) / f"gantt_{instance_name}_trials.png"
+                    convergence_file = Path(self.config.results_dir) / f"convergence_{instance_name}_trials.png"
+                else:  # Single
+                    result_file = Path(self.config.results_dir) / f"{instance_name}_result.txt"
+                    gantt_file = Path(self.config.results_dir) / f"gantt_{instance_name}.png"
+                    convergence_file = Path(self.config.results_dir) / f"convergence_{instance_name}.png"
                 
                 for file in [result_file, gantt_file, convergence_file]:
                     if file.exists():
@@ -717,7 +847,7 @@ HIEN TRANG:
                 self.btn_gantt.config(state=tk.DISABLED)
                 self.btn_convergence.config(state=tk.DISABLED)
                 
-                messagebox.showinfo("Thong Bao", f"Da xoa ket qua {instance_name.upper()}")
+                messagebox.showinfo("Thong Bao", f"Da xoa ket qua {instance_name.upper()} ({mode})")
             except Exception as e:
                 messagebox.showerror("Loi", f"Khong the xoa: {e}")
     
