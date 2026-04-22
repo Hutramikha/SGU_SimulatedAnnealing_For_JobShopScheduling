@@ -46,19 +46,34 @@ class SAConfig:
         self.save_interval = 50       # In log mỗi N vòng lặp
     
     def display(self):
-        """Hiển thị tất cả cấu hình hiện tại"""
-        print("="*70)
-        print("CẤU HÌNH THUẬT TOÁN SIMULATED ANNEALING")
-        print("="*70)
-        print(f"Nhiệt độ ban đầu (T0):           {self.T0}")
-        print(f"Nhiệt độ dừng (T_min):          {self.T_min}")
-        print(f"Hệ số làm lạnh (exploration):   {self.alpha_explore}")
-        print(f"Hệ số làm lạnh (exploitation):  {self.alpha_exploit}")
-        print(f"Chiều dài Markov chain (L):     {self.L}")
-        print(f"Early stopping patience:        {self.patience}")
-        print(f"Reheating enabled:              {self.reheating_enabled}")
-        print(f"Xác suất Swap:                  {self.swap_probability}")
-        print("="*70)
+        """Hien thi tat ca cau hinh hien tai"""
+        try:
+            print("="*70)
+            print("CAU HINH THUAT TOAN SIMULATED ANNEALING")
+            print("="*70)
+            print(f"Nhiet do ban dau (T0):           {self.T0}")
+            print(f"Nhiet do dung (T_min):          {self.T_min}")
+            print(f"He so lam lanh (exploration):   {self.alpha_explore}")
+            print(f"He so lam lanh (exploitation):  {self.alpha_exploit}")
+            print(f"Chieu dai Markov chain (L):     {self.L}")
+            print(f"Early stopping patience:        {self.patience}")
+            print(f"Reheating enabled:              {self.reheating_enabled}")
+            print(f"Xac suat Swap:                  {self.swap_probability}")
+            print("="*70)
+        except Exception:
+            # Fallback ASCII version
+            print("="*70)
+            print("SIMULATED ANNEALING CONFIG")
+            print("="*70)
+            print(f"Initial Temperature (T0):        {self.T0}")
+            print(f"Stop Temperature (T_min):       {self.T_min}")
+            print(f"Cooling Rate (exploration):     {self.alpha_explore}")
+            print(f"Cooling Rate (exploitation):    {self.alpha_exploit}")
+            print(f"Markov Chain Length (L):        {self.L}")
+            print(f"Early stopping patience:        {self.patience}")
+            print(f"Reheating enabled:              {self.reheating_enabled}")
+            print(f"Swap probability:               {self.swap_probability}")
+            print("="*70)
 
 
 # Tạo instance mặc định

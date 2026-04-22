@@ -15,6 +15,13 @@ import random
 import numpy as np
 import time
 
+# Fix UTF-8 encoding on Windows
+try:
+    if sys.platform == 'win32':
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+except Exception:
+    pass  # Fallback nếu reconfigure không hỗ trợ
+
 # Thêm project root vào path (từ parent directory)
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))

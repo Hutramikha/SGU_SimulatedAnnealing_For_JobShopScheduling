@@ -1,0 +1,338 @@
+Instance: LA36
+================================================================================
+
+MULTI-TRIAL MODE (5 RUNS)
+--------------------------------------------------------------------------------
+Makespan: 1315
+BKS: 1268
+Best Trial: 5
+Number of Trials: 5
+Average Makespan: 1338.80
+Gap (%): 3.71
+Avg Gap (%): 5.58
+Total Time (s): 22.633
+Avg Time per Trial (s): 4.527
+
+CHI TIET TUNG TRIAL:
+--------------------------------------------------------------------------------
+
+TRIAL 1:
+  Makespan: 1334
+  Gap (%): 5.21%
+  Time (s): 3.984
+  
+  Qua Trinh Chay:
+    Tong Lap: 33750
+    Chap Nhan: 15311
+    Tu Choi: 18439
+    Ty Le Chap Nhan: 45.4%
+    Lich Su Makespan:
+      Dau: 1990
+      Cuoi (Best): 1334
+      Cai Thien: 656
+
+TRIAL 2:
+  Makespan: 1336
+  Gap (%): 5.36%
+  Time (s): 6.663
+  
+  Qua Trinh Chay:
+    Tong Lap: 33750
+    Chap Nhan: 14979
+    Tu Choi: 18771
+    Ty Le Chap Nhan: 44.4%
+    Lich Su Makespan:
+      Dau: 2022
+      Cuoi (Best): 1336
+      Cai Thien: 686
+
+TRIAL 3:
+  Makespan: 1375
+  Gap (%): 8.44%
+  Time (s): 3.969
+  
+  Qua Trinh Chay:
+    Tong Lap: 33750
+    Chap Nhan: 15529
+    Tu Choi: 18221
+    Ty Le Chap Nhan: 46.0%
+    Lich Su Makespan:
+      Dau: 2159
+      Cuoi (Best): 1375
+      Cai Thien: 784
+
+TRIAL 4:
+  Makespan: 1334
+  Gap (%): 5.21%
+  Time (s): 4.019
+  
+  Qua Trinh Chay:
+    Tong Lap: 33750
+    Chap Nhan: 15265
+    Tu Choi: 18485
+    Ty Le Chap Nhan: 45.2%
+    Lich Su Makespan:
+      Dau: 2133
+      Cuoi (Best): 1334
+      Cai Thien: 799
+
+TRIAL 5:
+  Makespan: 1315
+  Gap (%): 3.71%
+  Time (s): 3.998
+  
+  Qua Trinh Chay:
+    Tong Lap: 33750
+    Chap Nhan: 15539
+    Tu Choi: 18211
+    Ty Le Chap Nhan: 46.0%
+    Lich Su Makespan:
+      Dau: 2200
+      Cuoi (Best): 1315
+      Cai Thien: 885
+
+================================================================================
+Schedule:
+Makespan: 1315
+======================================================================
+Job 0:
+  Operation 0: Machine 4, Time [58, 79]
+  Operation 1: Machine 3, Time [161, 216]
+  Operation 2: Machine 6, Time [217, 288]
+  Operation 3: Machine 14, Time [288, 386]
+  Operation 4: Machine 10, Time [543, 555]
+  Operation 5: Machine 2, Time [597, 631]
+  Operation 6: Machine 9, Time [792, 808]
+  Operation 7: Machine 1, Time [828, 849]
+  Operation 8: Machine 0, Time [916, 969]
+  Operation 9: Machine 7, Time [969, 995]
+  Operation 10: Machine 8, Time [995, 1047]
+  Operation 11: Machine 5, Time [1075, 1170]
+  Operation 12: Machine 12, Time [1203, 1234]
+  Operation 13: Machine 11, Time [1234, 1276]
+  Operation 14: Machine 13, Time [1276, 1315]
+Job 1:
+  Operation 0: Machine 11, Time [0, 54]
+  Operation 1: Machine 4, Time [328, 411]
+  Operation 2: Machine 1, Time [411, 488]
+  Operation 3: Machine 7, Time [488, 552]
+  Operation 4: Machine 8, Time [569, 603]
+  Operation 5: Machine 14, Time [603, 682]
+  Operation 6: Machine 12, Time [682, 725]
+  Operation 7: Machine 0, Time [725, 780]
+  Operation 8: Machine 3, Time [780, 857]
+  Operation 9: Machine 6, Time [857, 876]
+  Operation 10: Machine 9, Time [876, 913]
+  Operation 11: Machine 5, Time [913, 992]
+  Operation 12: Machine 10, Time [1063, 1155]
+  Operation 13: Machine 13, Time [1176, 1238]
+  Operation 14: Machine 2, Time [1238, 1304]
+Job 2:
+  Operation 0: Machine 9, Time [37, 120]
+  Operation 1: Machine 5, Time [120, 197]
+  Operation 2: Machine 2, Time [197, 284]
+  Operation 3: Machine 7, Time [442, 480]
+  Operation 4: Machine 4, Time [576, 636]
+  Operation 5: Machine 12, Time [725, 823]
+  Operation 6: Machine 0, Time [823, 916]
+  Operation 7: Machine 13, Time [916, 933]
+  Operation 8: Machine 6, Time [933, 974]
+  Operation 9: Machine 10, Time [974, 1018]
+  Operation 10: Machine 3, Time [1018, 1087]
+  Operation 11: Machine 11, Time [1087, 1136]
+  Operation 12: Machine 8, Time [1136, 1160]
+  Operation 13: Machine 1, Time [1160, 1247]
+  Operation 14: Machine 14, Time [1264, 1289]
+Job 3:
+  Operation 0: Machine 5, Time [0, 77]
+  Operation 1: Machine 0, Time [77, 173]
+  Operation 2: Machine 9, Time [204, 232]
+  Operation 3: Machine 6, Time [443, 450]
+  Operation 4: Machine 4, Time [636, 731]
+  Operation 5: Machine 13, Time [731, 766]
+  Operation 6: Machine 7, Time [766, 801]
+  Operation 7: Machine 8, Time [801, 877]
+  Operation 8: Machine 11, Time [877, 886]
+  Operation 9: Machine 12, Time [886, 981]
+  Operation 10: Machine 2, Time [985, 1028]
+  Operation 11: Machine 1, Time [1052, 1127]
+  Operation 12: Machine 10, Time [1155, 1216]
+  Operation 13: Machine 14, Time [1216, 1226]
+  Operation 14: Machine 3, Time [1226, 1305]
+Job 4:
+  Operation 0: Machine 10, Time [118, 205]
+  Operation 1: Machine 4, Time [411, 439]
+  Operation 2: Machine 8, Time [439, 489]
+  Operation 3: Machine 2, Time [489, 548]
+  Operation 4: Machine 0, Time [548, 594]
+  Operation 5: Machine 11, Time [594, 639]
+  Operation 6: Machine 14, Time [682, 691]
+  Operation 7: Machine 9, Time [727, 770]
+  Operation 8: Machine 6, Time [770, 822]
+  Operation 9: Machine 7, Time [822, 849]
+  Operation 10: Machine 1, Time [849, 940]
+  Operation 11: Machine 13, Time [940, 981]
+  Operation 12: Machine 3, Time [1000, 1016]
+  Operation 13: Machine 5, Time [1016, 1075]
+  Operation 14: Machine 12, Time [1273, 1312]
+Job 5:
+  Operation 0: Machine 0, Time [0, 20]
+  Operation 1: Machine 2, Time [20, 91]
+  Operation 2: Machine 4, Time [175, 253]
+  Operation 3: Machine 13, Time [253, 319]
+  Operation 4: Machine 3, Time [355, 369]
+  Operation 5: Machine 12, Time [397, 405]
+  Operation 6: Machine 14, Time [405, 447]
+  Operation 7: Machine 6, Time [512, 540]
+  Operation 8: Machine 1, Time [774, 828]
+  Operation 9: Machine 9, Time [828, 861]
+  Operation 10: Machine 11, Time [930, 1019]
+  Operation 11: Machine 8, Time [1160, 1186]
+  Operation 12: Machine 7, Time [1186, 1223]
+  Operation 13: Machine 10, Time [1223, 1256]
+  Operation 14: Machine 5, Time [1256, 1299]
+Job 6:
+  Operation 0: Machine 8, Time [0, 69]
+  Operation 1: Machine 4, Time [79, 175]
+  Operation 2: Machine 12, Time [175, 192]
+  Operation 3: Machine 0, Time [220, 289]
+  Operation 4: Machine 7, Time [289, 334]
+  Operation 5: Machine 11, Time [334, 365]
+  Operation 6: Machine 6, Time [365, 443]
+  Operation 7: Machine 10, Time [443, 463]
+  Operation 8: Machine 3, Time [463, 490]
+  Operation 9: Machine 13, Time [490, 577]
+  Operation 10: Machine 1, Time [577, 651]
+  Operation 11: Machine 5, Time [651, 735]
+  Operation 12: Machine 14, Time [965, 1041]
+  Operation 13: Machine 2, Time [1042, 1136]
+  Operation 14: Machine 9, Time [1153, 1234]
+Job 7:
+  Operation 0: Machine 4, Time [0, 58]
+  Operation 1: Machine 13, Time [58, 148]
+  Operation 2: Machine 11, Time [179, 255]
+  Operation 3: Machine 3, Time [274, 355]
+  Operation 4: Machine 7, Time [419, 442]
+  Operation 5: Machine 9, Time [442, 470]
+  Operation 6: Machine 1, Time [488, 506]
+  Operation 7: Machine 2, Time [548, 580]
+  Operation 8: Machine 12, Time [580, 666]
+  Operation 9: Machine 8, Time [666, 765]
+  Operation 10: Machine 14, Time [840, 937]
+  Operation 11: Machine 0, Time [969, 993]
+  Operation 12: Machine 10, Time [1018, 1063]
+  Operation 13: Machine 6, Time [1063, 1135]
+  Operation 14: Machine 5, Time [1170, 1195]
+Job 8:
+  Operation 0: Machine 5, Time [77, 104]
+  Operation 1: Machine 1, Time [104, 150]
+  Operation 2: Machine 6, Time [150, 217]
+  Operation 3: Machine 8, Time [293, 320]
+  Operation 4: Machine 13, Time [320, 339]
+  Operation 5: Machine 10, Time [463, 543]
+  Operation 6: Machine 2, Time [580, 597]
+  Operation 7: Machine 3, Time [597, 645]
+  Operation 8: Machine 7, Time [645, 707]
+  Operation 9: Machine 11, Time [707, 719]
+  Operation 10: Machine 14, Time [937, 965]
+  Operation 11: Machine 4, Time [965, 1063]
+  Operation 12: Machine 0, Time [1063, 1105]
+  Operation 13: Machine 9, Time [1105, 1153]
+  Operation 14: Machine 12, Time [1153, 1203]
+Job 9:
+  Operation 0: Machine 11, Time [54, 91]
+  Operation 1: Machine 5, Time [197, 277]
+  Operation 2: Machine 4, Time [439, 514]
+  Operation 3: Machine 8, Time [514, 569]
+  Operation 4: Machine 7, Time [569, 619]
+  Operation 5: Machine 0, Time [619, 713]
+  Operation 6: Machine 9, Time [713, 727]
+  Operation 7: Machine 6, Time [727, 768]
+  Operation 8: Machine 14, Time [768, 840]
+  Operation 9: Machine 3, Time [857, 907]
+  Operation 10: Machine 10, Time [907, 968]
+  Operation 11: Machine 13, Time [1047, 1126]
+  Operation 12: Machine 2, Time [1136, 1234]
+  Operation 13: Machine 12, Time [1234, 1252]
+  Operation 14: Machine 1, Time [1252, 1315]
+Job 10:
+  Operation 0: Machine 7, Time [0, 65]
+  Operation 1: Machine 3, Time [65, 161]
+  Operation 2: Machine 0, Time [173, 220]
+  Operation 3: Machine 4, Time [253, 328]
+  Operation 4: Machine 12, Time [328, 397]
+  Operation 5: Machine 14, Time [488, 546]
+  Operation 6: Machine 10, Time [555, 588]
+  Operation 7: Machine 1, Time [651, 722]
+  Operation 8: Machine 9, Time [770, 792]
+  Operation 9: Machine 13, Time [792, 824]
+  Operation 10: Machine 5, Time [824, 881]
+  Operation 11: Machine 8, Time [881, 960]
+  Operation 12: Machine 2, Time [1028, 1042]
+  Operation 13: Machine 11, Time [1136, 1167]
+  Operation 14: Machine 6, Time [1199, 1259]
+Job 11:
+  Operation 0: Machine 1, Time [0, 34]
+  Operation 1: Machine 2, Time [91, 138]
+  Operation 2: Machine 3, Time [216, 274]
+  Operation 3: Machine 5, Time [292, 343]
+  Operation 4: Machine 4, Time [514, 576]
+  Operation 5: Machine 6, Time [576, 620]
+  Operation 6: Machine 9, Time [620, 628]
+  Operation 7: Machine 7, Time [628, 645]
+  Operation 8: Machine 10, Time [645, 742]
+  Operation 9: Machine 8, Time [765, 794]
+  Operation 10: Machine 11, Time [915, 930]
+  Operation 11: Machine 13, Time [981, 1047]
+  Operation 12: Machine 12, Time [1047, 1087]
+  Operation 13: Machine 0, Time [1105, 1149]
+  Operation 14: Machine 14, Time [1226, 1264]
+Job 12:
+  Operation 0: Machine 3, Time [0, 50]
+  Operation 1: Machine 7, Time [65, 122]
+  Operation 2: Machine 13, Time [148, 209]
+  Operation 3: Machine 5, Time [343, 363]
+  Operation 4: Machine 11, Time [365, 450]
+  Operation 5: Machine 12, Time [450, 540]
+  Operation 6: Machine 2, Time [631, 689]
+  Operation 7: Machine 4, Time [731, 794]
+  Operation 8: Machine 10, Time [794, 878]
+  Operation 9: Machine 1, Time [940, 979]
+  Operation 10: Machine 9, Time [979, 1066]
+  Operation 11: Machine 6, Time [1135, 1156]
+  Operation 12: Machine 14, Time [1156, 1212]
+  Operation 13: Machine 8, Time [1212, 1244]
+  Operation 14: Machine 0, Time [1244, 1301]
+Job 13:
+  Operation 0: Machine 9, Time [120, 204]
+  Operation 1: Machine 7, Time [204, 249]
+  Operation 2: Machine 5, Time [277, 292]
+  Operation 3: Machine 14, Time [447, 488]
+  Operation 4: Machine 10, Time [742, 760]
+  Operation 5: Machine 4, Time [794, 876]
+  Operation 6: Machine 11, Time [886, 915]
+  Operation 7: Machine 2, Time [915, 985]
+  Operation 8: Machine 1, Time [985, 1052]
+  Operation 9: Machine 3, Time [1087, 1117]
+  Operation 10: Machine 13, Time [1126, 1176]
+  Operation 11: Machine 6, Time [1176, 1199]
+  Operation 12: Machine 0, Time [1199, 1219]
+  Operation 13: Machine 12, Time [1252, 1273]
+  Operation 14: Machine 8, Time [1273, 1311]
+Job 14:
+  Operation 0: Machine 9, Time [0, 37]
+  Operation 1: Machine 10, Time [37, 118]
+  Operation 2: Machine 11, Time [118, 179]
+  Operation 3: Machine 14, Time [179, 236]
+  Operation 4: Machine 8, Time [236, 293]
+  Operation 5: Machine 0, Time [293, 345]
+  Operation 6: Machine 7, Time [345, 419]
+  Operation 7: Machine 6, Time [450, 512]
+  Operation 8: Machine 12, Time [540, 570]
+  Operation 9: Machine 1, Time [722, 774]
+  Operation 10: Machine 2, Time [774, 812]
+  Operation 11: Machine 13, Time [824, 892]
+  Operation 12: Machine 4, Time [892, 946]
+  Operation 13: Machine 3, Time [946, 1000]
+  Operation 14: Machine 5, Time [1195, 1211]
+

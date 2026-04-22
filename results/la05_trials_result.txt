@@ -1,0 +1,158 @@
+Instance: LA05
+================================================================================
+
+MULTI-TRIAL MODE (5 RUNS)
+--------------------------------------------------------------------------------
+Makespan: 593
+BKS: 593
+Best Trial: 1
+Number of Trials: 5
+Average Makespan: 593.00
+Gap (%): 0.00
+Avg Gap (%): 0.00
+Total Time (s): 5.014
+Avg Time per Trial (s): 1.003
+
+CHI TIET TUNG TRIAL:
+--------------------------------------------------------------------------------
+
+TRIAL 1:
+  Makespan: 593
+  Gap (%): 0.00%
+  Time (s): 1.008
+  
+  Qua Trinh Chay:
+    Tong Lap: 33750
+    Chap Nhan: 19405
+    Tu Choi: 14345
+    Ty Le Chap Nhan: 57.5%
+    Lich Su Makespan:
+      Dau: 645
+      Cuoi (Best): 593
+      Cai Thien: 52
+
+TRIAL 2:
+  Makespan: 593
+  Gap (%): 0.00%
+  Time (s): 1.012
+  
+  Qua Trinh Chay:
+    Tong Lap: 33750
+    Chap Nhan: 19312
+    Tu Choi: 14438
+    Ty Le Chap Nhan: 57.2%
+    Lich Su Makespan:
+      Dau: 710
+      Cuoi (Best): 593
+      Cai Thien: 117
+
+TRIAL 3:
+  Makespan: 593
+  Gap (%): 0.00%
+  Time (s): 1.008
+  
+  Qua Trinh Chay:
+    Tong Lap: 33750
+    Chap Nhan: 19417
+    Tu Choi: 14333
+    Ty Le Chap Nhan: 57.5%
+    Lich Su Makespan:
+      Dau: 601
+      Cuoi (Best): 593
+      Cai Thien: 8
+
+TRIAL 4:
+  Makespan: 593
+  Gap (%): 0.00%
+  Time (s): 0.992
+  
+  Qua Trinh Chay:
+    Tong Lap: 33750
+    Chap Nhan: 19505
+    Tu Choi: 14245
+    Ty Le Chap Nhan: 57.8%
+    Lich Su Makespan:
+      Dau: 601
+      Cuoi (Best): 593
+      Cai Thien: 8
+
+TRIAL 5:
+  Makespan: 593
+  Gap (%): 0.00%
+  Time (s): 0.994
+  
+  Qua Trinh Chay:
+    Tong Lap: 33750
+    Chap Nhan: 19546
+    Tu Choi: 14204
+    Ty Le Chap Nhan: 57.9%
+    Lich Su Makespan:
+      Dau: 597
+      Cuoi (Best): 593
+      Cai Thien: 4
+
+================================================================================
+Schedule:
+Makespan: 593
+======================================================================
+Job 0:
+  Operation 0: Machine 1, Time [46, 118]
+  Operation 1: Machine 0, Time [247, 334]
+  Operation 2: Machine 4, Time [334, 429]
+  Operation 3: Machine 2, Time [429, 495]
+  Operation 4: Machine 3, Time [495, 555]
+Job 1:
+  Operation 0: Machine 4, Time [115, 120]
+  Operation 1: Machine 3, Time [289, 324]
+  Operation 2: Machine 0, Time [334, 382]
+  Operation 3: Machine 2, Time [495, 534]
+  Operation 4: Machine 1, Time [534, 588]
+Job 2:
+  Operation 0: Machine 1, Time [0, 46]
+  Operation 1: Machine 3, Time [153, 173]
+  Operation 2: Machine 2, Time [275, 296]
+  Operation 3: Machine 0, Time [382, 479]
+  Operation 4: Machine 4, Time [479, 534]
+Job 3:
+  Operation 0: Machine 0, Time [188, 247]
+  Operation 1: Machine 3, Time [324, 343]
+  Operation 2: Machine 4, Time [429, 475]
+  Operation 3: Machine 1, Time [475, 509]
+  Operation 4: Machine 2, Time [534, 571]
+Job 4:
+  Operation 0: Machine 4, Time [0, 23]
+  Operation 1: Machine 2, Time [202, 275]
+  Operation 2: Machine 3, Time [343, 368]
+  Operation 3: Machine 1, Time [407, 431]
+  Operation 4: Machine 0, Time [527, 555]
+Job 5:
+  Operation 0: Machine 3, Time [0, 28]
+  Operation 1: Machine 0, Time [53, 98]
+  Operation 2: Machine 4, Time [98, 103]
+  Operation 3: Machine 1, Time [118, 196]
+  Operation 4: Machine 2, Time [296, 379]
+Job 6:
+  Operation 0: Machine 0, Time [0, 53]
+  Operation 1: Machine 3, Time [82, 153]
+  Operation 2: Machine 1, Time [196, 233]
+  Operation 3: Machine 4, Time [233, 262]
+  Operation 4: Machine 2, Time [379, 391]
+Job 7:
+  Operation 0: Machine 4, Time [103, 115]
+  Operation 1: Machine 2, Time [115, 202]
+  Operation 2: Machine 3, Time [256, 289]
+  Operation 3: Machine 1, Time [312, 367]
+  Operation 4: Machine 0, Time [555, 593]
+Job 8:
+  Operation 0: Machine 2, Time [65, 114]
+  Operation 1: Machine 3, Time [173, 256]
+  Operation 2: Machine 1, Time [367, 407]
+  Operation 3: Machine 0, Time [479, 527]
+  Operation 4: Machine 4, Time [534, 541]
+Job 9:
+  Operation 0: Machine 2, Time [0, 65]
+  Operation 1: Machine 3, Time [65, 82]
+  Operation 2: Machine 0, Time [98, 188]
+  Operation 3: Machine 4, Time [262, 289]
+  Operation 4: Machine 1, Time [289, 312]
+

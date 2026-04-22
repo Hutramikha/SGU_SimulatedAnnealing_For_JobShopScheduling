@@ -48,7 +48,7 @@ class DataLoader:
         if not file_path.exists():
             raise FileNotFoundError(f"File {file_path} không tồn tại")
         
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
         
         # Bỏ qua dòng comment header (nếu có)

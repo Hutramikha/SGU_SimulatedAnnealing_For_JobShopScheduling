@@ -7,9 +7,17 @@ Chức năng: Thuật toán Simulated Annealing cải tiến để giải JSSP
 """
 
 import time
+import sys
 from typing import List, Dict, Tuple
 from .jssp_model import JSSPModel
 from .utils import NeighborhoodOperators, CoolingSchedule, MetropolisAcceptance, EarlyStoppingChecker
+
+# Fix UTF-8 encoding on Windows
+try:
+    if sys.platform == 'win32':
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+except Exception:
+    pass  # Fallback nếu reconfigure không hỗ trợ
 
 
 class SASolver:
@@ -58,10 +66,18 @@ class SASolver:
                 - history: Dict chứa lịch sử tìm kiếm
         """
         if self.config.verbose:
-            print(f"\n{'='*70}")
-            print("GIẢI THUẬT SIMULATED ANNEALING")
-            print(f"{'='*70}")
-            self.config.display()
+            try:
+                print(f"\n{'='*70}")
+                print("GIAI THUAT SIMULATED ANNEALING")
+                print(f"{'='*70}")
+            except Exception:
+                print(f"\n{'='*70}")
+                print("SIMULATED ANNEALING ALGORITHM")
+                print(f"{'='*70}")
+            try:
+                self.config.display()
+            except Exception as e:
+                print(f"[INFO] Could not display config details: {type(e).__name__}")
         
         start_time = time.time()
         
@@ -175,36 +191,64 @@ class SASolver:
         self.best_makespan = self.current_makespan
         
         if self.config.verbose:
-            print(f"\n[OK] Khởi tạo:")
-            print(f"  - Lời giải ban đầu: Makespan = {self.current_makespan}")
+            try:
+                print(f"\n[OK] Khoi tao:")
+                print(f"  - Loi giai ban dau: Makespan = {self.current_makespan}")
+            except Exception:
+                print(f"\n[OK] Initialization:")
+                print(f"  - Initial Solution: Makespan = {self.current_makespan}")
     
     def _print_progress(self, iteration: int):
         """In thông tin tiến độ"""
-        print(f"Lặp {iteration:6d} | T = {self.config.T0:10.6f} | "
-              f"Best = {self.best_makespan:6d} | "
-              f"Accepted = {self.history['accepted_count']:6d} | "
-              f"Rejected = {self.history['rejected_count']:6d}")
+        try:
+            print(f"Lap {iteration:6d} | T = {self.config.T0:10.6f} | "
+                  f"Best = {self.best_makespan:6d} | "
+                  f"Accepted = {self.history['accepted_count']:6d} | "
+                  f"Rejected = {self.history['rejected_count']:6d}")
+        except Exception as e:
+            print(f"Iteration {iteration:6d} | T = {self.config.T0:10.6f} | "
+                  f"Best = {self.best_makespan:6d} | "
+                  f"Accepted = {self.history['accepted_count']:6d} | "
+                  f"Rejected = {self.history['rejected_count']:6d}")
     
     def _print_results(self, elapsed_time: float, total_iterations: int):
         """In kết quả cuối cùng"""
-        print(f"\n{'='*70}")
-        print("KẾT QUẢ CUỐI CÙNG")
-        print(f"{'='*70}")
-        print(f"Makespan tốt nhất:   {self.best_makespan}")
-        print(f"Tổng lặp:            {total_iterations}")
-        print(f"Chấp nhận:           {self.history['accepted_count']}")
-        print(f"Từ chối:             {self.history['rejected_count']}")
-        print(f"Thời gian:           {elapsed_time:.2f} giây")
-        
-        # Check trước khi chia để tránh division by zero
-        total_decisions = self.history['accepted_count'] + self.history['rejected_count']
-        if total_decisions > 0:
-            acceptance_rate = self.history['accepted_count'] / total_decisions * 100
-            print(f"Tỷ lệ chấp nhận:     {acceptance_rate:.1f}%")
-        else:
-            print(f"Tỷ lệ chấp nhận:     N/A (Không có quyết định)")
-        
-        print(f"{'='*70}\n")
+        try:
+            print(f"\n{'='*70}")
+            print("KET QUA CUOI CUNG")
+            print(f"{'='*70}")
+            print(f"Makespan tot nhat:   {self.best_makespan}")
+            print(f"Tong lap:            {total_iterations}")
+            print(f"Chap nhan:           {self.history['accepted_count']}")
+            print(f"Tu choi:             {self.history['rejected_count']}")
+            print(f"Thoi gian:           {elapsed_time:.2f} giay")
+            
+            # Check trước khi chia để tránh division by zero
+            total_decisions = self.history['accepted_count'] + self.history['rejected_count']
+            if total_decisions > 0:
+                acceptance_rate = self.history['accepted_count'] / total_decisions * 100
+                print(f"Ty le chap nhan:     {acceptance_rate:.1f}%")
+            else:
+                print(f"Ty le chap nhan:     N/A (Khong co quyet dinh)")
+            
+            print(f"{'='*70}\n")
+        except Exception as e:
+            # Fallback ASCII version
+            print(f"\n{'='*70}")
+            print("RESULTS")
+            print(f"{'='*70}")
+            print(f"Best Makespan:   {self.best_makespan}")
+            print(f"Total Iterations: {total_iterations}")
+            print(f"Accepted:        {self.history['accepted_count']}")
+            print(f"Rejected:        {self.history['rejected_count']}")
+            print(f"Time (s):        {elapsed_time:.2f}")
+            
+            total_decisions = self.history['accepted_count'] + self.history['rejected_count']
+            if total_decisions > 0:
+                acceptance_rate = self.history['accepted_count'] / total_decisions * 100
+                print(f"Acceptance Rate: {acceptance_rate:.1f}%")
+            
+            print(f"{'='*70}\n")
     
     def get_schedule(self) -> Dict:
         """

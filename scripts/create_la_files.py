@@ -57,7 +57,7 @@ try:
         la_name = f"la{i:02d}"
         if la_name in instances:
             file_path = data_folder / f"{la_name}.txt"
-            with open(file_path, 'w') as f:
+            with open(file_path, 'w', encoding='utf-8') as f:
                 f.write('\n'.join(instances[la_name]))
             print(f"[OK] {la_name}.txt ({len(instances[la_name])} dòng)")
             count += 1
