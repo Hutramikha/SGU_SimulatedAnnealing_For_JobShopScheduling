@@ -133,8 +133,6 @@ run.bat
 
 **Chú ý:** File `run.bat` chỉ hoạt động trên Windows. Nếu dùng Linux/Mac, xem phần Chạy CLI bên dưới.
 
----
-
 #### Chạy CLI (dòng lệnh):
 ```bash
 python gui/gui.py
