@@ -324,19 +324,7 @@ Quản lý toàn bộ tham số thuật toán
 
 ---
 
-## 13. KẾT QUẢ MẪU
-
-| Instance | Jobs | Machines | BKS | Lấy Được | Gap % | Thời Gian |
-|----------|------|----------|-----|----------|-------|----------|
-| la01 | 10 | 5 | 666 | 627 | 5.86% | 23s |
-| la05 | 10 | 5 | 593 | 613 | 3.37% | 25s |
-| la10 | 15 | 5 | 1220 | 1254 | 2.79% | 35s |
-| la20 | 15 | 10 | 2291 | 2345 | 2.36% | 45s |
-| la30 | 20 | 10 | 2406 | 2468 | 2.58% | 52s |
-
----
-
-## 14. HỢP ĐÀN NÂNG CAO TỪ ĐÂY
+## 13. HỢP ĐÀN NÂNG CAO TỪ ĐÂY
 
 1. **Hybrid Approach**: Kết hợp SA + Local Search hoặc Genetic Algorithm
 2. **Parallel Computing**: Chạy nhiều SA cùng lúc, lấy kết quả tốt nhất
@@ -346,7 +334,7 @@ Quản lý toàn bộ tham số thuật toán
 
 ---
 
-## 15. PHIÊN BẢN VÀ GHI CHÚ
+## 14. PHIÊN BẢN VÀ GHI CHÚ
 
 **Phiên bản:** 1.1.0 (Latest)
 **Ngày cập nhật:** 2026-04-22
