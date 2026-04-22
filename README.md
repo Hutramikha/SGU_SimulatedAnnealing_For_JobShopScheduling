@@ -4,7 +4,59 @@ Dự án này hiện thực hóa thuật toán Simulated Annealing (SA) để gi
 
 ---
 
-## 1. GIỚI THIỆU BÀI TOÁN
+## HƯỚNG DẪN NHANH (Quick Start)
+
+### Người Dùng Windows:
+**Đơn giản nhất - Chỉ cần double-click!**
+```
+1. Tìm file: run.bat (trong thư mục gốc)
+2. Double-click hoặc chạy: run.bat
+3. Giao diện GUI sẽ mở ngay lập tức
+```
+
+### Người Dùng Linux/Mac:
+```bash
+# Cài đặt thư viện
+pip install -r requirement.txt
+
+# Chạy GUI
+python gui/gui.py
+```
+
+---
+
+## 2.5 CHI TIẾT VỀ run.bat
+
+File `run.bat` là script tự động hóa để người dùng Windows chạy dự án một cách dễ dàng nhất.
+
+### Tính Năng Tự Động:
+
+```
+run.bat sẽ:
+├─ Kiểm tra Python 3.8+ có được cài đặt
+├─ Kiểm tra các thư viện: numpy, matplotlib, pillow
+├─ Tự động cài đặt (pip install) nếu thiếu thư viện
+├─ Mở GUI tự động
+└─ Xử lý lỗi và hiển thị thông báo chi tiết
+```
+
+### Lợi Ích:
+
+| Lợi Ích | Chi Tiết |
+|---------|----------|
+| **Dễ sử dụng** | Double-click hoặc chạy từ Command Prompt |
+| **Tự động cài đặt** | Không phải lo về thư viện thiếu |
+| **Tương thích** | Hoạt động trên Windows 7, 8, 10, 11 |
+| **An toàn** | Kiểm tra toàn bộ trước khi chạy |
+| **Tiện ích** | Tự động tạo folder `results/` nếu chưa có |
+
+### Lưu Ý:
+
+- **Windows only:** Người dùng Linux/Mac vui lòng chạy: `python gui/gui.py`
+- **Cần Python:** Phải cài đặt Python 3.8+ từ [python.org](https://www.python.org/)
+- **Thêm vào PATH:** Khi cài Python, chọn "Add Python to PATH"
+
+---
 
 ### Bài Toán Job Shop Scheduling (JSSP)
 
@@ -64,18 +116,32 @@ pip install -r requirement.txt
 
 ### Cách Sử Dụng
 
-**Chạy CLI (dòng lệnh):**
-```bash
-python main.py
+#### Cách Dễ Nhất: Chạy run.bat (Windows)
+
+**Bước 1:** Mở thư mục dự án, tìm file `run.bat`
+
+**Bước 2:** Double-click vào `run.bat` hoặc chạy trong Command Prompt:
+```batch
+run.bat
 ```
 
-**Chạy GUI (giao diện đồ họa):**
+**Tự động:** 
+- Kiểm tra Python được cài đặt
+- Kiểm tra thư viện phụ thuộc
+- Tự động cài đặt nếu thiếu
+- Mở giao diện GUI ngay lập tức
+
+**Chú ý:** File `run.bat` chỉ hoạt động trên Windows. Nếu dùng Linux/Mac, xem phần Chạy CLI bên dưới.
+
+---
+
+#### Chạy CLI (dòng lệnh):
 ```bash
 python gui/gui.py
 ```
 
-**Chọn instance khác:**
-Chỉnh sửa trong main.py hoặc chọn trong GUI từ la01 đến la40
+#### Chọn instance khác:
+Chọn trong GUI từ la01 đến la40
 
 ---
 
@@ -83,7 +149,7 @@ Chỉnh sửa trong main.py hoặc chọn trong GUI từ la01 đến la40
 
 ```
 SAforJSScheduling/
-├── main.py                      # Entry point chính
+├── run.bat                      # CHAY TAI DAY (Windows users)
 ├── gui/gui.py                   # Giao diện đồ họa
 ├── README.md                    # Tài liệu này
 ├── requirement.txt              # Thư viện phụ thuộc
@@ -102,6 +168,10 @@ SAforJSScheduling/
 ├── data/
 │   ├── la01.txt ~ la40.txt     # 40 instances
 │   └── LA_BKS.csv              # Best Known Solutions
+│
+├── scripts/
+│   ├── create_la_files.py      # Tạo file instances
+│   └── ...                     # Các script tiện ích
 │
 └── results/                     # Kết quả đầu ra
     ├── la01_result.txt         # Kết quả text
@@ -221,6 +291,27 @@ Quản lý toàn bộ tham số thuật toán
 
 ## 10. KHẮC PHỤC LỖI THƯỜNG GẶP
 
+### Lỗi với run.bat:
+
+**Lỗi:** run.bat không chạy được (Windows)
+**Cách sửa:** 
+- Kiểm tra Python đã được cài đặt: `python --version` trong Command Prompt
+- Nếu chưa cài, download từ https://www.python.org/
+- Khi cài, **chọn "Add Python to PATH"**
+
+**Lỗi:** "Python không được công nhận" hoặc "python: command not found"
+**Cách sửa:** 
+- Cài lại Python và chọn "Add Python to PATH"
+- Restart Command Prompt sau cài đặt
+- Thử lại: `python --version`
+
+**Lỗi:** run.bat bị chặn bởi antivirus
+**Cách sửa:**
+- Thêm run.bat vào whitelist của antivirus
+- Hoặc chạy trực tiếp: `python gui/gui.py`
+
+### Lỗi Chung:
+
 **Lỗi:** "ModuleNotFoundError: No module named 'src'"
 **Cách sửa:** Chạy từ thư mục dự án chính
 
@@ -229,6 +320,9 @@ Quản lý toàn bộ tham số thuật toán
 
 **Lỗi:** Makespan sai khi chạy instance đó sau instance khác
 **Cách sửa:** Đã fix - reset self.history và self.config.T0 trong _phase_initialization()
+
+**Lỗi:** Encoding/Unicode error ("charmap codec can't encode")
+**Cách sửa:** Đã fix tự động - không cần lo lắng
 
 ---
 
@@ -256,14 +350,20 @@ Quản lý toàn bộ tham số thuật toán
 
 ## 13. PHIÊN BẢN VÀ GHI CHÚ
 
-**Phiên bản:** 1.0.0 Final
-**Ngày cập nhật:** 2026-04-09
+**Phiên bản:** 1.1.0 (Latest)
+**Ngày cập nhật:** 2026-04-22
+
+**Tính Năng Mới:**
+- **run.bat** - Tự động hóa chạy GUI trên Windows (one-click launch)
+- UTF-8 encoding fix - Hỗ trợ đầy đủ tiếng Việt
+- Cập nhật README chi tiết hơn
 
 **Các sửa chữa gần đây:**
 - State pollution bug: Fixed (LA07→LA06 không còn sai)
 - Division by zero: Fixed
 - Visualization edge cases: Fixed
 - Threading issues: Fixed
+- Encoding issues: Fixed (charmap codec)
 
 **Trạng thái:** Production Ready - Tất cả tính năng hoạt động
 
