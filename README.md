@@ -25,7 +25,7 @@ python gui/gui.py
 
 ---
 
-## 2.5 CHI TIẾT VỀ run.bat
+## 1. CHI TIẾT VỀ run.bat
 
 File `run.bat` là script tự động hóa để người dùng Windows chạy dự án một cách dễ dàng nhất.
 
