@@ -28,8 +28,6 @@ wheels/
 *~
 
 # Output files
-results/*.png
-results/*.txt
 *.log
 
 # OS
