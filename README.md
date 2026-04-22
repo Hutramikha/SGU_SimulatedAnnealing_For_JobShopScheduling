@@ -4,7 +4,7 @@ Dự án này hiện thực hóa thuật toán Simulated Annealing (SA) để gi
 
 ---
 
-## HƯỚNG DẪN NHANH (Quick Start)
+## 1. HƯỚNG DẪN NHANH (Quick Start)
 
 ### Người Dùng Windows:
 **Đơn giản nhất - Chỉ cần double-click!**
@@ -25,7 +25,7 @@ python gui/gui.py
 
 ---
 
-## 1. CHI TIẾT VỀ run.bat
+## 2. CHI TIẾT VỀ run.bat
 
 File `run.bat` là script tự động hóa để người dùng Windows chạy dự án một cách dễ dàng nhất.
 
@@ -89,7 +89,7 @@ Constraint:
 
 ---
 
-## 2. GIẢI PHÁP: SIMULATED ANNEALING
+## 3. GIẢI PHÁP: SIMULATED ANNEALING
 
 ### Các Thành Phần Chính
 
@@ -101,7 +101,7 @@ Constraint:
 
 ---
 
-## 3. CÀI ĐẶT VÀ CHẠY
+## 4. CÀI ĐẶT VÀ CHẠY
 
 ### Yêu Cầu
 
@@ -145,7 +145,7 @@ Chọn trong GUI từ la01 đến la40
 
 ---
 
-## 4. CẤU TRÚC THƯ MỤC
+## 5. CẤU TRÚC THƯ MỤC
 
 ```
 SAforJSScheduling/
@@ -181,7 +181,7 @@ SAforJSScheduling/
 
 ---
 
-## 5. CẤU HÌNH THUẬT TOÁN
+## 6. CẤU HÌNH THUẬT TOÁN
 
 Tất cả tham số trong file `config/config.py`:
 
@@ -201,7 +201,7 @@ Tất cả tham số trong file `config/config.py`:
 
 ---
 
-## 6. HIỂU KẾT QUẢ
+## 7. HIỂU KẾT QUẢ
 
 ### Các Chỉ Số Chính
 
@@ -225,7 +225,7 @@ Tất cả tham số trong file `config/config.py`:
 
 ---
 
-## 7. LOẠI DỮ LIỆU
+## 8. LOẠI DỮ LIỆU
 
 ### Lawrence Instances (LA01-LA40)
 
@@ -240,7 +240,7 @@ Tất cả tham số trong file `config/config.py`:
 
 ---
 
-## 8. QUY TRÌNH THUẬT TOÁN
+## 9. QUY TRÌNH THUẬT TOÁN
 
 ### 4 Giai Đoạn
 
@@ -267,7 +267,7 @@ Chừng khi T > T_min:
 
 ---
 
-## 9. CÁC MODULE CHÍNH
+## 10. CÁC MODULE CHÍNH
 
 ### src/sa_solver.py
 Lõi thuật toán SA. Hàm chính: `solve()`
@@ -289,7 +289,7 @@ Quản lý toàn bộ tham số thuật toán
 
 ---
 
-## 10. KHẮC PHỤC LỖI THƯỜNG GẶP
+## 11. KHẮC PHỤC LỖI THƯỜNG GẶP
 
 ### Lỗi với run.bat:
 
@@ -326,7 +326,7 @@ Quản lý toàn bộ tham số thuật toán
 
 ---
 
-## 11. KẾT QUẢ MẪU
+## 12. KẾT QUẢ MẪU
 
 | Instance | Jobs | Machines | BKS | Lấy Được | Gap % | Thời Gian |
 |----------|------|----------|-----|----------|-------|----------|
@@ -338,7 +338,7 @@ Quản lý toàn bộ tham số thuật toán
 
 ---
 
-## 12. HỢP ĐÀN NÂNG CAO TỪ ĐÂY
+## 13. HỢP ĐÀN NÂNG CAO TỪ ĐÂY
 
 1. **Hybrid Approach**: Kết hợp SA + Local Search hoặc Genetic Algorithm
 2. **Parallel Computing**: Chạy nhiều SA cùng lúc, lấy kết quả tốt nhất
@@ -348,7 +348,7 @@ Quản lý toàn bộ tham số thuật toán
 
 ---
 
-## 13. PHIÊN BẢN VÀ GHI CHÚ
+## 14. PHIÊN BẢN VÀ GHI CHÚ
 
 **Phiên bản:** 1.1.0 (Latest)
 **Ngày cập nhật:** 2026-04-22
@@ -369,7 +369,7 @@ Quản lý toàn bộ tham số thuật toán
 
 ---
 
-## 14. TÀI LIỆU THAM KHẢO
+## 15. TÀI LIỆU THAM KHẢO
 
 - **OR-Library:** http://people.brunel.ac.uk/mastjjb/jeb/orlib/jobshopinfo.html
 - **Kirkpatrick et al. (1983):** "Optimization by Simulated Annealing"
