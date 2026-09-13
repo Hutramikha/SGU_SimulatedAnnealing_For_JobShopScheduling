@@ -4,7 +4,7 @@ Dự án này hiện thực hóa thuật toán Simulated Annealing (SA) để gi
 
 ---
 
-## 1. HƯỚNG DẪN NHANH (Quick Start)
+## HƯỚNG DẪN NHANH (Quick Start)
 
 ### Người Dùng Windows:
 **Đơn giản nhất - Chỉ cần double-click!**
@@ -25,7 +25,7 @@ python gui/gui.py
 
 ---
 
-## 2. CHI TIẾT VỀ run.bat
+## CHI TIẾT VỀ run.bat
 
 File `run.bat` là script tự động hóa để người dùng Windows chạy dự án một cách dễ dàng nhất.
 
@@ -58,7 +58,7 @@ run.bat sẽ:
 
 ---
 
-## 3. BÀI TOÁN JOB SHOP SCHEDULING (JSSP)
+## BÀI TOÁN JOB SHOP SCHEDULING (JSSP)
 
 JSSP là một bài toán tối ưu hóa cổ điển trong lĩnh vực lập lịch sản xuất. Định nghĩa:
 
@@ -89,7 +89,7 @@ Constraint:
 
 ---
 
-## 4. GIẢI PHÁP: SIMULATED ANNEALING
+## GIẢI PHÁP: SIMULATED ANNEALING
 
 ### Các Thành Phần Chính
 
@@ -101,7 +101,7 @@ Constraint:
 
 ---
 
-## 5. CÀI ĐẶT VÀ CHẠY
+## CÀI ĐẶT VÀ CHẠY
 
 ### Yêu Cầu
 
@@ -143,7 +143,7 @@ Chọn trong GUI từ la01 đến la40
 
 ---
 
-## 6. CẤU TRÚC THƯ MỤC
+## CẤU TRÚC THƯ MỤC
 
 ```
 SAforJSScheduling/
@@ -179,7 +179,7 @@ SAforJSScheduling/
 
 ---
 
-## 7. CẤU HÌNH THUẬT TOÁN
+## CẤU HÌNH THUẬT TOÁN
 
 Tất cả tham số trong file `config/config.py`:
 
@@ -199,7 +199,7 @@ Tất cả tham số trong file `config/config.py`:
 
 ---
 
-## 8. HIỂU KẾT QUẢ
+## HIỂU KẾT QUẢ
 
 ### Các Chỉ Số Chính
 
@@ -223,7 +223,7 @@ Tất cả tham số trong file `config/config.py`:
 
 ---
 
-## 9. LOẠI DỮ LIỆU
+## LOẠI DỮ LIỆU
 
 ### Lawrence Instances (LA01-LA40)
 
@@ -238,7 +238,7 @@ Tất cả tham số trong file `config/config.py`:
 
 ---
 
-## 10. QUY TRÌNH THUẬT TOÁN
+## QUY TRÌNH THUẬT TOÁN
 
 ### 4 Giai Đoạn
 
@@ -265,7 +265,7 @@ Chừng khi T > T_min:
 
 ---
 
-## 11. CÁC MODULE CHÍNH
+## CÁC MODULE CHÍNH
 
 ### src/sa_solver.py
 Lõi thuật toán SA. Hàm chính: `solve()`
@@ -287,7 +287,7 @@ Quản lý toàn bộ tham số thuật toán
 
 ---
 
-## 12. KHẮC PHỤC LỖI THƯỜNG GẶP
+## KHẮC PHỤC LỖI THƯỜNG GẶP
 
 ### Lỗi với run.bat:
 
@@ -324,7 +324,7 @@ Quản lý toàn bộ tham số thuật toán
 
 ---
 
-## 13. HỢP ĐÀN NÂNG CAO TỪ ĐÂY
+## HỢP ĐÀN NÂNG CAO TỪ ĐÂY
 
 1. **Hybrid Approach**: Kết hợp SA + Local Search hoặc Genetic Algorithm
 2. **Parallel Computing**: Chạy nhiều SA cùng lúc, lấy kết quả tốt nhất
@@ -334,7 +334,7 @@ Quản lý toàn bộ tham số thuật toán
 
 ---
 
-## 14. PHIÊN BẢN VÀ GHI CHÚ
+## PHIÊN BẢN VÀ GHI CHÚ
 
 **Phiên bản:** 1.1.0 (Latest)
 **Ngày cập nhật:** 2026-04-22
